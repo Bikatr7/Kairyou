@@ -6,7 +6,6 @@ on:
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -16,37 +15,33 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Define current version
-        id: version
-        run: |
-          current_version="0.0.3"
-          echo "Current version: $current_version"
-          echo "::set-output name=current_version::$current_version"
-
-      - name: Fetch previous version from PyPI
-        id: previous_version
-        run: |
-          previous_version=$(twine search kairyou | grep -oP '(?<=kairyou )\d+\.\d+\.\d+' || echo "0.0.0")
-          if [[ $previous_version == "" ]]; then
-            previous_version="0.0.0"
-          fi
-          echo "Previous version on PyPI: $previous_version"
-          echo "::set-output name=previous_version::$previous_version"
-  
-          
-      - name: Build distribution files
-        if: steps.version.outputs.current_version != steps.previous_version.outputs.previous_version
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install build
+          python -m pip install twine build
+
+      - name: Define current version
+        id: define_version
+        run: |
+          echo "current_version=0.0.3" >> $GITHUB_ENV
+          echo "::set-output name=current_version::0.0.3"
+
+      - name: Fetch previous version from PyPI
+        id: fetch_previous_version
+        run: |
+          previous_version=$(twine search kairyou | grep -oP '(?<=kairyou )\d+\.\d+\.\d+' || echo "0.0.0")
+          echo "previous_version=$previous_version" >> $GITHUB_ENV
+          echo "::set-output name=previous_version::$previous_version"
+
+      - name: Build distribution files
+        if: steps.define_version.outputs.current_version != steps.fetch_previous_version.outputs.previous_version
+        run: |
           python -m build
-          
+
       - name: Publish to PyPI
-        if: steps.version.outputs.current_version != steps.previous_version.outputs.previous_version
+        if: steps.define_version.outputs.current_version != steps.fetch_previous_version.outputs.previous_version
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install twine
           python -m twine upload dist/*
