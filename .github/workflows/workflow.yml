@@ -19,7 +19,7 @@ jobs:
       - name: Check current version
         id: version
         run: |
-          current_version=$(python -c "from src.kairyou.kairyou import __version__; print(__version__)")
+          current_version=$(python -c "from kairyou.kairyou import __version__; print(__version__)")
           echo "Current version: $current_version"
           echo "::set-output name=current_version::$current_version"
 
