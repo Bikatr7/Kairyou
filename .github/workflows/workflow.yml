@@ -16,19 +16,23 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Check current version
+      - name: Define current version
         id: version
         run: |
-          current_version=$(python -c "from kairyou.kairyou import __version__; print(__version__)")
+          current_version="0.0.3"
           echo "Current version: $current_version"
           echo "::set-output name=current_version::$current_version"
 
       - name: Fetch previous version from PyPI
         id: previous_version
         run: |
-          previous_version=$(twine search kairyou | grep -oP '(?<=kairyou )\d+\.\d+\.\d+')
+          previous_version=$(twine search kairyou | grep -oP '(?<=kairyou )\d+\.\d+\.\d+' || echo "0.0.0")
+          if [[ $previous_version == "" ]]; then
+            previous_version="0.0.0"
+          fi
           echo "Previous version on PyPI: $previous_version"
           echo "::set-output name=previous_version::$previous_version"
+  
           
       - name: Build distribution files
         if: steps.version.outputs.current_version != steps.previous_version.outputs.previous_version
