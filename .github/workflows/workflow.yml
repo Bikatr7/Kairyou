@@ -13,33 +13,37 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: '3.8'
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install twine build
 
-      - name: Define current version
-        id: define_version
+      - name: Determine Current and Previous Version
+        id: version_check
         run: |
-          echo "current_version=0.0.3" >> $GITHUB_ENV
-          echo "::set-output name=current_version::0.0.3"
-
-      - name: Fetch previous version from PyPI
-        id: fetch_previous_version
-        run: |
+          current_version="0.0.3" # Manually set your current version here
+          echo "Current version: $current_version"
+          # Install twine if not already installed
+          python -m pip install twine
+          # Fetch the previous version from PyPI
           previous_version=$(twine search kairyou | grep -oP '(?<=kairyou )\d+\.\d+\.\d+' || echo "0.0.0")
-          echo "previous_version=$previous_version" >> $GITHUB_ENV
-          echo "::set-output name=previous_version::$previous_version"
+          echo "Previous version on PyPI: $previous_version"
+          # Compare versions and set an environment variable for conditional checks
+          if [ "$current_version" != "$previous_version" ]; then
+            echo "VERSIONS_DIFFER=1" >> $GITHUB_ENV
+          else
+            echo "VERSIONS_DIFFER=0" >> $GITHUB_ENV
+          fi
 
       - name: Build distribution files
-        if: steps.define_version.outputs.current_version != steps.fetch_previous_version.outputs.previous_version
+        if: env.VERSIONS_DIFFER == '1'
         run: |
           python -m build
 
       - name: Publish to PyPI
-        if: steps.define_version.outputs.current_version != steps.fetch_previous_version.outputs.previous_version
+        if: env.VERSIONS_DIFFER == '1'
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
