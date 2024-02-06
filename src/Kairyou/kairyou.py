@@ -21,6 +21,8 @@ class Kairyou:
     
     """
 
+    __version__ = "0.0.2"
+
     ## The dictionary containing the rules for preprocessing.
     replacement_json = {}
 

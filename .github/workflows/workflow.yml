@@ -19,14 +19,14 @@ jobs:
       - name: Check current version
         id: version
         run: |
-          current_version=$(python -c "import your_module; print(your_module.__version__)")
+          current_version=$(python -c "from src.kairyou.kairyou import __version__; print(__version__)")
           echo "Current version: $current_version"
           echo "::set-output name=current_version::$current_version"
 
       - name: Fetch previous version from PyPI
         id: previous_version
         run: |
-          previous_version=$(twine search your_package_name | grep -oP '(?<=your_package_name )\d+\.\d+\.\d+')
+          previous_version=$(twine search kairyou | grep -oP '(?<=kairyou )\d+\.\d+\.\d+')
           echo "Previous version on PyPI: $previous_version"
           echo "::set-output name=previous_version::$previous_version"
           
