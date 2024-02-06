@@ -15,37 +15,30 @@ jobs:
         with:
           python-version: '3.8'
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install twine build
-
-      - name: Determine Current and Previous Version
-        id: version_check
-        run: |
-          current_version="0.0.3" # Manually set your current version here
-          echo "Current version: $current_version"
-          # Install twine if not already installed
-          python -m pip install twine
-          # Fetch the previous version from PyPI
-          previous_version=$(twine search kairyou | grep -oP '(?<=kairyou )\d+\.\d+\.\d+' || echo "0.0.0")
-          echo "Previous version on PyPI: $previous_version"
-          # Compare versions and set an environment variable for conditional checks
-          if [ "$current_version" != "$previous_version" ]; then
-            echo "VERSIONS_DIFFER=1" >> $GITHUB_ENV
-          else
-            echo "VERSIONS_DIFFER=0" >> $GITHUB_ENV
-          fi
-
-      - name: Build distribution files
-        if: env.VERSIONS_DIFFER == '1'
-        run: |
-          python -m build
-
-      - name: Publish to PyPI
-        if: env.VERSIONS_DIFFER == '1'
+      - name: Install Dependencies and Publish if Necessary
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
-          python -m twine upload dist/*
+          python -m pip install --upgrade pip
+          python -m pip install twine build requests
+          
+          # Define the current version
+          current_version="0.0.3"
+          echo "Current version: $current_version"
+          
+          # Use Python to fetch the previous version from PyPI
+          previous_version=$(python -c "import requests; response = requests.get('https://pypi.org/pypi/kairyou/json'); print(response.json()['info']['version'] if response.ok else '0.0.0')")
+          echo "Previous version on PyPI: $previous_version"
+          
+          # Compare the current version with the previous version
+          if [ "$current_version" != "$previous_version" ]; then
+            echo "Version difference detected, proceeding with build and publish."
+            
+            # Build the package
+            python -m build
+            
+            # Publish the package to PyPI
+            python -m twine upload dist/* --username __token__ --password $TWINE_PASSWORD
+          else
+            echo "No version difference detected, skipping build and publish."
