@@ -1,14 +1,9 @@
 ## built-in libraries
-from __future__ import annotations ## used for cheating the circular import issue that occurs when i need to type check some things
-
 import string
 import typing
 
 ## custom modules
-if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
-    from models.kairyou import Name
-
-from modules.common.file_ensurer import FileEnsurer
+from util import Name
 
 ## https://en.wikipedia.org/wiki/Katakana_(Unicode_block)
 KATAKANA_CHARSET = {
@@ -49,23 +44,6 @@ class KatakanaHandler:
     Contains helper functions for katakana handling.
 
     """
-
-    katakana_words = []
-
-##--------------------start-of-load_katakana_words()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    @staticmethod
-    def load_katakana_words() -> None:
-
-        """
-
-        Loads the katakana library into memory.
-
-        """
-
-        with open(FileEnsurer.katakana_words_path, "r", encoding="utf-8") as file:
-            for line in file:
-                KatakanaHandler.katakana_words.append(line.strip())
 
 ##--------------------start-of-is_katakana_only()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

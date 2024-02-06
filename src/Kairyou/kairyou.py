@@ -1,5 +1,4 @@
 ## built-in libraries
-import enum
 import itertools
 import typing
 import time
@@ -9,61 +8,8 @@ import spacy
 
 ## custom modules
 from katakana_handler import KatakanaHandler
-
-class InvalidReplacementJson(Exception):
-
-    """
-    
-    Exception raised when the replacement json file is invalid.
-
-    """
-
-    message = "Invalid replacement json file. Your json must contain the following keys: kutouten, unicode, phrases, single_words, enhanced_check_whitelist, full_names, single_names, name_like, and honorifics."
-
-##-------------------start-of-Name---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class Name(typing.NamedTuple):
-
-    """
-    
-    Represents a Japanese name along with its equivalent english name.
-    The Name class extends the NamedTuple class, allowing for the creation of a tuple with named fields.
-
-    """
-
-    jap : str
-    eng : str
-
-##-------------------start-of-ReplacementType---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class ReplacementType(enum.Flag):
-
-    """
-
-    Represents how a name should be replaced when dealing with honorifics and overall replacements.
-
-    The ReplacementType class extends the Flag class, allowing for the combination of name markers using bitwise operations.
-    
-    Name Markers:
-    - NONE : No specific name marker.
-    - FULL_NAME : Represents a full name, first and last name.
-    - FIRST_NAME : Represents the first name only.
-    - FULL_AND_FIRST : Represents both the full name and the first name separately.
-    - LAST_NAME : Represents the last name only.
-    - FULL_AND_LAST : Represents both the full name and the last name.
-    - FIRST_AND_LAST : Represents both the first name and the last name.
-    - ALL_NAMES : Represents all possible names.
-
-    """
-
-    NONE = 0 
-    FULL_NAME = 1 
-    FIRST_NAME = 2 
-    FULL_AND_FIRST = 3 
-    LAST_NAME = 4 
-    FULL_AND_LAST = 5 
-    FIRST_AND_LAST = 6 
-    ALL_NAMES = 7 
+from util import get_elapsed_time, Name, ReplacementType
+from exceptions import InvalidReplacementJsonKeys, InvalidReplacementJsonName
 
 ##-------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -88,8 +34,6 @@ class Kairyou:
     
     ## How japanese names are separated in the japanese text
     JAPANESE_NAME_SEPARATORS = ["・", ""]
-
-    need_to_run = True
 
     ##------------------------/
 
@@ -118,9 +62,8 @@ class Kairyou:
             assert "name_like" in Kairyou.replacement_json
             assert "honorifics" in Kairyou.replacement_json
 
-        except AssertionError as e:
-
-            raise Exception("Invalid replacement json file. Missing keys. Please check the jsons folder for an example replacement json file.")
+        except AssertionError:
+            raise InvalidReplacementJsonKeys
 
 ##-------------------start-of-preprocess()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -133,17 +76,8 @@ class Kairyou:
 
         """
 
-        if(not Kairyou.need_to_run):
-            print("Preprocessing skipped.")
-            return
-        
         ## in case of successive runs
-        Logger.clear_log_file()
         Kairyou.total_replacements = 0
-
-        Toolkit.clear_console()
-
-        print("Preprocessing...")
 
         ## (title, json_key, is_name, replace_name, honorific_type)
         replacement_rules = [ 
@@ -166,10 +100,8 @@ class Kairyou:
 
         time_end = time.time()
 
-        Toolkit.clear_console()
-
         Kairyou.preprocessing_log += "\nTotal Replacements  : " + str(Kairyou.total_replacements)
-        Kairyou.preprocessing_log += "\nTime Elapsed : " + Toolkit.get_elapsed_time(time_start, time_end)
+        Kairyou.preprocessing_log += "\nTime Elapsed : " + get_elapsed_time(time_start, time_end)
 
 ##-------------------start-of-replace_non_katakana()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -332,15 +264,8 @@ class Kairyou:
         
             assert len(japanese_names) == len(english_names)
 
-        except AssertionError as e:
-
-            print("Name lengths do not match for : ") 
-            print(Name) 
-            print("\nPlease correct Name discrepancy in JSON\n")
-
-            Toolkit.pause_console()
-            
-            raise e
+        except AssertionError:
+            raise InvalidReplacementJsonName(Name)
         
         if(ReplacementType.FULL_NAME in replace_type):
             indices = range(len(japanese_names)) 
@@ -518,47 +443,3 @@ class Kairyou:
         Kairyou.total_replacements += jap_replace_count
         
         return jap_replace_count
-    
-##-------------------start-of-write_kairyou_results()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    @staticmethod
-    def write_kairyou_results() -> None:
-
-        """
-        
-        This function is called to write the results to the output directory.
-
-        """
-
-        ## ensures the output directory exists, cause it could get moved or fucked with.
-        FileEnsurer.standard_create_directory(FileEnsurer.output_dir)
-
-        with(open(FileEnsurer.preprocessed_text_path, 'w', encoding='utf-8')) as file:
-            file.write(Kairyou.text_to_preprocess) 
-
-        with open(FileEnsurer.kairyou_log_path, 'w', encoding='utf-8') as file:
-            file.write(Kairyou.preprocessing_log)
-
-        with open(FileEnsurer.error_log_path, 'w', encoding='utf-8') as file:
-            file.write(Kairyou.error_log)
-
-        with open(FileEnsurer.je_check_path, 'w', encoding='utf-8') as file:
-            file.truncate()
-
-        with open(FileEnsurer.translated_text_path, 'w', encoding='utf-8') as file:
-            file.truncate()
-
-        ## Instructions to create a copy of the output for archival
-        FileEnsurer.standard_create_directory(FileEnsurer.archive_dir)
-
-        timestamp = Toolkit.get_timestamp(is_archival=True)
-
-        list_of_result_tuples = [('kairyou_preprocessed_text', Kairyou.text_to_preprocess),
-                                 ('kairyou_preprocessing_log', Kairyou.preprocessing_log),
-                                 ('kairyou_error_log', Kairyou.error_log)]
-
-        FileEnsurer.archive_results(list_of_result_tuples,
-                                    module='kairyou', timestamp=timestamp)
-
-        ## need to clear preprocessing results as it could be run consecutively
-        Kairyou.preprocessing_log = ""
