@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = Kairyou"
+version = "0.0.1"
+authors = [
+  { name="Bikatr7", email="Tetalon07@gmail.com" },
+]
+description = "A Japanese preprocessor"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/Bikatr7/Kairyou"
+Issues = "https://github.com/Bikatr7/Kairyou/issues"
