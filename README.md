@@ -1,0 +1,2 @@
+# Kairyou
+A Japanese preprocessor
