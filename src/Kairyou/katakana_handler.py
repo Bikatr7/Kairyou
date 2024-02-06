@@ -1,9 +1,10 @@
 ## built-in libraries
 import string
 import typing
+import os
 
 ## custom modules
-from util import Name
+from util import Name, PathHandler
 
 ## https://en.wikipedia.org/wiki/Katakana_(Unicode_block)
 KATAKANA_CHARSET = {
@@ -44,6 +45,23 @@ class KatakanaHandler:
     Contains helper functions for katakana handling.
 
     """
+
+    katakana_words = []
+
+##--------------------start-of-load_katakana_words()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def load_katakana_words() -> None:
+
+        """
+
+        Loads the katakana library into memory.
+
+        """
+
+        with open(PathHandler.katakana_words_path, "r", encoding="utf-8") as file:
+            for line in file:
+                KatakanaHandler.katakana_words.append(line.strip())
 
 ##--------------------start-of-is_katakana_only()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

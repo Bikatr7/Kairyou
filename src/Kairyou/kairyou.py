@@ -8,7 +8,7 @@ import spacy
 
 ## custom modules
 from katakana_handler import KatakanaHandler
-from util import get_elapsed_time, Name, ReplacementType
+from util import get_elapsed_time, Name, ReplacementType, PathHandler
 from exceptions import InvalidReplacementJsonKeys, InvalidReplacementJsonName
 
 ##-------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ class Kairyou:
 
     """
 
-    Kairyou is the preprocessor for the Kudasai program.
+    The global Kairyou client for preprocessing Japanese text.
     
     """
 
@@ -26,10 +26,10 @@ class Kairyou:
     ## The dictionary containing the rules for preprocessing.
     replacement_json = {}
 
+    ## The text to be preprocessed. Preprocessing is in-place.
     text_to_preprocess = ""
 
     preprocessing_log = ""
-
     error_log = ""
 
     total_replacements = 0
@@ -41,6 +41,9 @@ class Kairyou:
 
     ## The spacy NER model used for enhanced replacement checking.
     ner = spacy.load("ja_core_news_lg")
+
+    ## load the katakana words into memory
+    KatakanaHandler.load_katakana_words()
 
 ##-------------------start-of-validate_replace_json()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -66,20 +69,57 @@ class Kairyou:
 
         except AssertionError:
             raise InvalidReplacementJsonKeys
+        
+##-------------------start-of-reset_globals()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def reset_globals() -> None:
+
+        """
+
+        Resets the global variables.
+
+        """
+
+        Kairyou.preprocessing_log = ""
+        Kairyou.error_log = ""
+
+        Kairyou.total_replacements = 0
 
 ##-------------------start-of-preprocess()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def preprocess() -> None: 
+    def preprocess(text_to_preprocess:str, replacement_json:dict) -> typing.Tuple[str, str, str]:
 
         """
 
-        Preprocesses the text to be translated.
+        Preprocesses the text using the replacement json.
+
+        Using preprocess will effectively reset the global Kairyou client.
+
+        Parameters:
+        text_to_preprocess (str) : The text to be preprocessed.
+        replacement_json (dict) : The rules for preprocessing.
+
+        Returns:
+        Kairyou.text_to_preprocess (str) : The preprocessed text.
+        Kairyou.preprocessing_log (str) : The log of replacements made.
+        Kairyou.error_log (str) : The log of errors encountered (if any).
+
+        Raises:
+        ValueError : If the text to be preprocessed is empty.
 
         """
 
-        ## in case of successive runs
-        Kairyou.total_replacements = 0
+        Kairyou.reset_globals()
+
+        if(len(text_to_preprocess) != 0):
+            Kairyou.text_to_preprocess = text_to_preprocess
+            Kairyou.replacement_json = replacement_json
+            Kairyou.validate_replacement_json()
+        
+        else:
+            raise ValueError("The text to be preprocessed cannot be empty.")
 
         ## (title, json_key, is_name, replace_name, honorific_type)
         replacement_rules = [ 
@@ -104,6 +144,8 @@ class Kairyou:
 
         Kairyou.preprocessing_log += "\nTotal Replacements  : " + str(Kairyou.total_replacements)
         Kairyou.preprocessing_log += "\nTime Elapsed : " + get_elapsed_time(time_start, time_end)
+
+        return Kairyou.text_to_preprocess, Kairyou.preprocessing_log, Kairyou.error_log
 
 ##-------------------start-of-replace_non_katakana()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
