@@ -8,7 +8,7 @@ requires = ["setuptools>=61.0",
 build-backend = "setuptools.build_meta"
 
 [project]
-name = Kairyou"
+name = "Kairyou"
 version = "0.0.1"
 authors = [
   { name="Bikatr7", email="Tetalon07@gmail.com" },
