@@ -5,6 +5,7 @@ import time
 
 ## third-party libraries
 import spacy
+from kairyou.kairyou import Kairyou
 
 ## custom modules
 from katakana_util import KatakanaUtil
