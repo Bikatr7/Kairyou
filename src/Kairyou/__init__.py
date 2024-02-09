@@ -1,2 +1,2 @@
 from .kairyou import Kairyou
-from .katakana_util import KatakanaUtil
+##from .katakana_util import KatakanaUtil
