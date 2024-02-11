@@ -25,9 +25,10 @@ classifiers = [
 ]
 
 [tool.setuptools]
-package_data = [
-    ("lib", ["lib/*"]),
-]
+package_data = {
+    "": ["lib/*"],
+}
+
 
 [project.urls]
 Homepage = "https://github.com/Bikatr7/Kairyou"
