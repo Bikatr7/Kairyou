@@ -3,7 +3,8 @@ import string
 import typing
 
 ## custom modules
-from .util import Name, PathHandler
+from .util import Name
+from .words import katakana_words as words
 
 ##--------------------start-of-KatakanaUtil------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -15,7 +16,7 @@ class KatakanaUtil:
 
     """
 
-    katakana_words = []
+    katakana_words = words.split("\n")
 
     ## https://en.wikipedia.org/wiki/Katakana_(Unicode_block)
     KATAKANA_CHARSET = {
@@ -46,21 +47,6 @@ class KatakanaUtil:
     '⁓','⁔','⁕','⁖','⁗','⁘','⁙','⁚','⁛','⁜','⁝','⁞',' ','⁠',
     '⁦','⁧','⁨','⁩','«','»','×',"△","▼"
     } | set(string.punctuation) ## EN punctuation set
-
-##--------------------start-of-load_katakana_words()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    @staticmethod
-    def load_katakana_words() -> None:
-
-        """
-
-        Loads the katakana library into memory.
-
-        """
-
-        with open(PathHandler.katakana_words_path, "r", encoding="utf-8") as file:
-            for line in file:
-                KatakanaUtil.katakana_words.append(line.strip())
 
 ##--------------------start-of-is_katakana_only()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

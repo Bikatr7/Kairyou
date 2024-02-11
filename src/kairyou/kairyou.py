@@ -41,10 +41,7 @@ class Kairyou:
 
     ## The spacy NER model used for enhanced replacement checking.
     ner = spacy.load("ja_core_news_lg")
-
-    ## load the katakana words into memory
-    KatakanaUtil.load_katakana_words()
-
+    
 # -------------------start-of-validate_replace_json()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod

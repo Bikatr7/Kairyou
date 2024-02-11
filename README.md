@@ -97,7 +97,7 @@ The following functions are available in KatakanaUtil:
 
 is_katakana_only: Returns True if the input string is composed only of katakana characters.
 
-is_actual_word: Returns True if the input string is a actual Japanese Katakana word (not just something made up or a name). List of words can be found [here](src/kairyou/lib/katakana_words.txt).
+is_actual_word: Returns True if the input string is a actual Japanese Katakana word (not just something made up or a name). List of words can be found [here](src/kairyou/words.py).
 
 is_punctuation: Returns True if the input string is punctuation (Both Japanese and English punctuation are supported). List of punctuation can be found [here](src/kairyou/katakana_util.py).
 ```

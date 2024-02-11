@@ -1,7 +1,6 @@
 ## built-in libraries
 import enum
 import typing
-import os
 
 ##-------------------start-of-get_elapsed_time()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -76,23 +75,6 @@ class ReplacementType(enum.Flag):
     FULL_AND_LAST = 5 
     FIRST_AND_LAST = 6 
     ALL_NAMES = 7
-
-##-------------------start-of-PathHandler---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class PathHandler():
-
-    """
-    
-    Holds the paths for the different files used in the project.
-
-    """
-
-    script_dir = os.path.dirname(__file__)
-
-    lib_dir = os.path.join(script_dir, "lib")
-    examples_dir = os.path.join(os.path.dirname(os.path.dirname(script_dir)), "examples")
-    
-    katakana_words_path = os.path.join(lib_dir, "katakana_words.txt")
 
 ##-------------------start-of-demo_json---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
