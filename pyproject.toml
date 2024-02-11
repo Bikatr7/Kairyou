@@ -25,7 +25,7 @@ classifiers = [
 ]
 
 [tool.setuptools]
-data_files = [
+package_data = [
     ("lib", ["lib/*"]),
 ]
 
