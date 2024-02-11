@@ -2,6 +2,7 @@
 import itertools
 import typing
 import time
+import json
 
 ## third-party libraries
 import spacy
@@ -10,7 +11,7 @@ from kairyou.kairyou import Kairyou
 ## custom modules
 from katakana_util import KatakanaUtil
 from util import get_elapsed_time, Name, ReplacementType
-from exceptions import InvalidReplacementJsonKeys, InvalidReplacementJsonName
+from exceptions import InvalidReplacementJsonKeys, InvalidReplacementJsonName, InvalidReplacementJsonPath
 
 # -------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -54,6 +55,9 @@ class Kairyou:
 
         Validates the replacement json file.
 
+        Raises:
+        InvalidReplacementJsonKeys : If the replacement json file is missing keys.
+
         """
 
         try:
@@ -92,7 +96,7 @@ class Kairyou:
 ##-------------------start-of-preprocess()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def preprocess(text_to_preprocess:str, replacement_json:dict, persist:bool = False) -> typing.Tuple[str, str, str]:
+    def preprocess(text_to_preprocess:str, replacement_json:typing.Union[dict,str], persist:bool = False) -> typing.Tuple[str, str, str]:
 
         """
 
@@ -102,7 +106,7 @@ class Kairyou:
 
         Parameters:
         text_to_preprocess (str) : The text to be preprocessed.
-        replacement_json (dict) : The rules for preprocessing.
+        replacement_json (dict | str) : The rules for preprocessing. Can be a dictionary or a path to a json file.
         persist (bool | optional | default=False) : If True, the global Kairyou client will not be reset upon starting the function.
 
         Returns:
@@ -120,7 +124,20 @@ class Kairyou:
 
         if(len(text_to_preprocess) != 0):
             Kairyou.text_to_preprocess = text_to_preprocess
-            Kairyou.replacement_json = replacement_json
+
+            if(isinstance(replacement_json, str)):
+                ## try to load the replacement json file
+                try:
+
+                    with open(replacement_json, 'r', encoding='utf-8') as file: ## type: ignore (also a string)
+                        replacement_json = json.load(file)
+
+                except Exception:
+                    raise InvalidReplacementJsonPath(replacement_json) ## type: ignore (it's a string)
+                
+            else:
+                Kairyou.replacement_json = replacement_json
+
             Kairyou.validate_replacement_json()
 
         else:

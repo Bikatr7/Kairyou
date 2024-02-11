@@ -39,3 +39,24 @@ class InvalidReplacementJsonKeys(Exception):
     """
 
     message = "Invalid replacement json file. Your json must contain the following keys: kutouten, unicode, phrases, single_words, enhanced_check_whitelist, full_names, single_names, name_like, and honorifics. Please see https://github.com/Bikatr7/Kairyou/tree/main/examples for an example replacement json file."
+
+##-------------------start-of-InvalidReplacementJsonPath---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+class InvalidReplacementJsonPath(Exception):
+
+    """
+
+    Exception raised when the replacement json path is invalid.
+
+    """
+
+##-------------------start-of-__init__()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    def __init__(self, path:str):
+        
+        self.path = path
+
+        message = f"Invalid path to replacement json file: {self.path}\nPlease check the path and try again\n"
+
+        super().__init__(message)
+
