@@ -8,9 +8,9 @@ import json
 import spacy
 
 ## custom modules
-from katakana_util import KatakanaUtil
-from util import get_elapsed_time, Name, ReplacementType
-from exceptions import InvalidReplacementJsonKeys, InvalidReplacementJsonName, InvalidReplacementJsonPath
+from .katakana_util import KatakanaUtil
+from .util import get_elapsed_time, Name, ReplacementType
+from .exceptions import InvalidReplacementJsonKeys, InvalidReplacementJsonName, InvalidReplacementJsonPath
 
 # -------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
