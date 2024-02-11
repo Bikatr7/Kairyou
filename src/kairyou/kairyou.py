@@ -9,7 +9,7 @@ import spacy
 
 ## custom modules
 from .katakana_util import KatakanaUtil
-from .util import get_elapsed_time, Name, ReplacementType
+from .util import get_elapsed_time, Name, ReplacementType, blank_json
 from .exceptions import InvalidReplacementJsonKeys, InvalidReplacementJsonName, InvalidReplacementJsonPath
 
 # -------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ class Kairyou:
     """
 
     ## The dictionary containing the rules for preprocessing.
-    replacement_json = {}
+    replacement_json:dict = {}
 
     ## The text to be preprocessed. Preprocessing is in-place.
     text_to_preprocess = ""
@@ -55,7 +55,7 @@ class Kairyou:
         InvalidReplacementJsonKeys : If the replacement json file is missing keys.
 
         """
-
+        
         try:
             assert "kutouten" in Kairyou.replacement_json
             assert "unicode" in Kairyou.replacement_json
@@ -86,9 +86,6 @@ class Kairyou:
 
         Kairyou.total_replacements = 0
 
-        Kairyou.text_to_preprocess = ""
-        Kairyou.replacement_json = {}
-
 ##-------------------start-of-preprocess()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -99,6 +96,8 @@ class Kairyou:
         Preprocesses the text using the replacement json.
 
         Using preprocess will effectively reset the global Kairyou client unless persist is set to True.
+
+        Will skip the preprocessing if the replacement json is blank.
 
         Parameters:
         text_to_preprocess (str) : The text to be preprocessed.
@@ -115,6 +114,10 @@ class Kairyou:
 
         """
 
+        ## If the replacement json is blank, skip the preprocessing.
+        if(replacement_json == blank_json):
+            return "Skipped", "Skipped", "Skipped"
+
         if(not persist):
             Kairyou.reset_globals()
 
@@ -130,9 +133,8 @@ class Kairyou:
 
                 except Exception:
                     raise InvalidReplacementJsonPath(replacement_json) ## type: ignore (it's a string)
-                
-            else:
-                Kairyou.replacement_json = replacement_json
+            
+            Kairyou.replacement_json = replacement_json ## type: ignore (it's a dict)
 
             Kairyou.validate_replacement_json()
 

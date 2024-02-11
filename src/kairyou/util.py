@@ -78,6 +78,46 @@ class ReplacementType(enum.Flag):
 
 ##-------------------start-of-demo_json---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+blank_json={
+
+    "honorifics": {
+
+    },
+  
+    "single_words": {
+
+    },
+  
+    "unicode": {
+
+    },
+  
+    "phrases": {
+
+    },
+    
+    "kutouten": {
+
+    },
+  
+    "name_like": {
+  
+    },
+  
+    "single_names": {
+
+    },
+  
+    "full_names": {
+
+    },
+
+    "enhanced_check_whitelist": {
+
+    }
+    
+  }
+
 demo_json={
   "honorifics": {
     "ちゃん": "chan",
