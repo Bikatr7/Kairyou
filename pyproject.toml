@@ -24,11 +24,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-[tool.setuptools]
-package_data = {
-"": ["lib/*"]
-}
-
+[tool.setuptools.package_data]
+"" = ["lib/*"]
 
 [project.urls]
 Homepage = "https://github.com/Bikatr7/Kairyou"
