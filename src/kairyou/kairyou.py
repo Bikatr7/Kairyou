@@ -487,20 +487,20 @@ class Kairyou:
             Kairyou.preprocessing_log += ', '.join(
                 [f'{key}-{value}' for key, value in replacement_data.items() if value > 0]) + ')\n'
 
-# -------------------start-of-perform_enhanced_replace()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-perform_enhanced_replace()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
     def perform_enhanced_replace(jap: str, replacement: str) -> int:
         
         """
 
-        Uses ner (Named Entity Recognition) from the spacy module to replace names that need to be more carefully replaced, such as single kanji, katakana names, or those placed in the user whitelist.
+        Uses NER (Named Entity Recognition) from the spacy module to replace names that need to be more carefully replaced, such as single kanji, katakana names, or those placed in the user whitelist.
 
         May miss true positives, but should not replace false positives.
 
         Parameters:
         jap (str) : Japanese to be replaced.
-        replacement (str) : the replacement for the Japanese
+        replacement (str) : The replacement for the Japanese
 
         Returns:
         jap_replace_count (int) : How many japanese replacements that were made.
