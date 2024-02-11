@@ -24,6 +24,11 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[tool.setuptools]
+data_files = [
+    ("lib", ["lib/*"]),
+]
+
 [project.urls]
 Homepage = "https://github.com/Bikatr7/Kairyou"
 Issues = "https://github.com/Bikatr7/Kairyou/issues"
