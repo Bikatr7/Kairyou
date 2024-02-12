@@ -116,7 +116,7 @@ class Kairyou:
 
         ## If the replacement json is blank, skip the preprocessing.
         if(replacement_json == blank_json):
-            return "Skipped", "Skipped", "Skipped"
+            return text_to_preprocess, "Skipped", "Skipped"
 
         if(not persist):
             Kairyou.reset_globals()
