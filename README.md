@@ -6,6 +6,7 @@
 - [Usage](#usage)
   - [Kairyou](#kairyou)
   - [KatakanaUtil](#katakanautil)
+  - [Indexer](#indexer)
 - [License](#license)
 - [Contact](#contact)
 - [Contribution](#contribution)
@@ -27,9 +28,9 @@ To get started with Kairyou, install the package via pip:
 pip install kairyou
 ```
 
-Then, you can preprocess Japanese text by importing Kairyou and/or KatakanaUtil as follows:
+Then, you can preprocess Japanese text by importing Kairyou and/or KatakanaUtil/Indexer:
 ```python
-from kairyou import Kairyou, KatakanaUtil
+from kairyou import Kairyou, KatakanaUtil, Indexer
 ```
 
 Follow the usage examples provided in the [Usage](#usage) section for detailed instructions on preprocessing text and handling katakana.
@@ -95,7 +96,9 @@ Currently, Kairyou supports two json types, "Kudasai" and "Fukuin". "Kudasai" is
 
 [Example Fukuin Json](examples/cote_fukuin.json)
 
-KatakanaUtil<a name="katakanautil"></a>
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+**KatakanaUtil**<a name="katakanautil"></a>
 
 KatakanaUtil provides utility functions for handling katakana characters in Japanese text. Example usage:
 
@@ -114,6 +117,41 @@ is_katakana_only: Returns True if the input string is composed only of katakana 
 is_actual_word: Returns True if the input string is a actual Japanese Katakana word (not just something made up or a name). List of words can be found [here](src/kairyou/words.py).
 
 is_punctuation: Returns True if the input string is punctuation (Both Japanese and English punctuation are supported). List of punctuation can be found [here](src/kairyou/katakana_util.py).
+
+is_repeating_sequence: Returns True if the input string is just a repeating sequence of characters. (e.g. "ジロジロ")
+
+more_punctuation_than_japanese: Returns True if the input string has more punctuation than Japanese characters.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Indexer**<a name="indexer"></a>
+
+Indexer is for "indexing" Japanese text. What this means is that, given input_text, a knowledge_base, and a replacements_json. It will return a list of new "names", and the occurrence which was flagged.
+
+What is considered a name is a bit complicated. But:
+1. Must have the "person" label when using spaCy's NER.
+2. Cannot have more punctuation than Japanese characters.
+3. Cannot be a repeating sequence of characters.
+4. Cannot be an actual Japanese Katakana word.
+
+So, it'll return names that don't in the other texts.
+
+This can be done via index()
+```pyq
+from kairyou import Indexer
+
+input_text = "Your Japanese text here." ## or a path to a text file
+knowledge_base = ["more Japanese text here.", "even_more_japanese_text_here"] ## or a path to a text file or directory full of text files
+replacements_json = "path/to/your/replacement_rules.json"  ## or a dict of rules
+
+NamesAndOccurrences = Indexer.index(input_text, knowledge_base, replacements_json)
+```
+
+NamesAndOccurrences is a list of named tuples, with the following fields:
+1. name: The name that was found.
+2. occurrence: The occurrence of the name in the input_text.
+
+Index works with both Fukuin and Kudasai jsons.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 

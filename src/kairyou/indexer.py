@@ -201,16 +201,42 @@ class Indexer:
 
         return names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json
     
+##-------------------start-of-is_name_in_other_sources()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def is_name_in_other_sources(name: str, all_names: typing.Set[str]) -> bool:
+
+        """
+
+        Checks if a name is in the knowledge_base or replacement_json.
+
+        """
+
+
+        return any(other_name in name for other_name in all_names)
+    
 ##-------------------start-of-index()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def index(text_to_index, knowledge_base, replacement_json):
+    def index(text_to_index:str, knowledge_base:str, replacement_json:str):
 
         """
         
-        Indexes the text_to_index using the knowledge_base and replacement_json.
+        Determines which names in the text_to_index are not in the knowledge_base or replacement_json and returns them as a list.
+
+        Returns a tuple of tuples. That tuple has the name itself and the occurrence of the name that was flagged.
+
+        Parameters:
+        text_to_index (str): The text to index. Can be a path to a text file, or just the text itself.
+        knowledge_base (str): The knowledge base. Can be a path to a directory containing text files, a path to a text file, or just the text itself.
+        replacement_json (str): The replacement json. Can be a path to a json, or as the json itself.
+
+        Returns:
+        new_names (NameAndOccurrence): A list of names that are not in the knowledge_base or replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
 
         """
+
+        new_names:typing.List[NameAndOccurrence] = []
 
         Indexer.load_static_data(text_to_index, knowledge_base, replacement_json)
 
@@ -221,10 +247,13 @@ class Indexer:
         if(replacement_json):
             names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer.trim_honorifics(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
 
-        for name in names_in_text_to_index:
-            
-            if(not any(other_name.name in name.name for other_name in names_in_knowledge_base) and not any(other_name.name in name.name for other_name in names_in_replacement_json)):
-                    print(f"Name {name.name} occurrence {name.occurrence} in text_to_index is not in the knowledge_base or the replacement_json")
+        names_in_knowledge_base = set(name.name for name in names_in_knowledge_base)
+        names_in_replacement_json = set(name.name for name in names_in_replacement_json)
 
-        ## print labels and their occurrences
-        print(Indexer.entity_occurrences)
+        all_names = names_in_knowledge_base | names_in_replacement_json
+
+        for name in names_in_text_to_index:
+            if(not Indexer.is_name_in_other_sources(name.name, all_names)):
+                new_names.append(name)
+
+        return new_names

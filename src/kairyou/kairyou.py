@@ -489,7 +489,7 @@ class Kairyou:
                 sentence = Kairyou.ner(jap_lines[i])
 
                 for entity in sentence.ents:
-                    if (entity.text == jap and entity.label_ == "PERSON" or entity.label_ == "PROPN"):
+                    if (entity.text == jap and entity.label_ == "PERSON"):
                         jap_replace_count += 1
                         jap_lines[i] = jap_lines[i][:entity.start_char] + \
                             replacement + jap_lines[i][entity.end_char:]

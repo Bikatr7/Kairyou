@@ -128,7 +128,20 @@ class KatakanaUtil:
 ##--------------------start-of-is_repeating_sequence()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  
     @staticmethod
-    def is_repeating_sequence(word):
+    def is_repeating_sequence(word:str) -> bool:
+
+        """
+
+        Checks if the given word has a repeating sequence.
+
+        Parameters:
+        word (str) : the word to check.
+
+        Returns:
+        bool : True if the word has a repeating sequence, False otherwise.
+
+        """
+
         for i in range(1, len(word)//2 + 1):  # Only need to iterate to half the word length
             ## Check every possible subsequence size
             for ii in range(len(word) - i):
@@ -140,7 +153,19 @@ class KatakanaUtil:
 ##--------------------start-of-more_punctuation_than_japanese()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def more_punctuation_than_japanese(text):
+    def more_punctuation_than_japanese(text:str) -> bool:
+
+        """
+
+        Checks if the given text has more punctuation than Japanese characters.
+
+        Parameters:
+        text (str) : the text to check.
+
+        Returns:
+        bool : True if the text has more punctuation than Japanese characters, False otherwise.
+
+        """
 
         # Count non-punctuation (assumed to be Japanese) and punctuation characters
         non_punctuation_count = sum(1 for char in text if char not in KatakanaUtil.PUNCTUATION_CHARSET)
