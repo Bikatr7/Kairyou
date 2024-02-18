@@ -1,5 +1,6 @@
 ## built-in libraries
 import os
+import typing
 import json
 import typing
 
@@ -8,6 +9,11 @@ import spacy
 
 ## custom modules
 from .util import validate_replacement_json
+from .katakana_util import KatakanaUtil
+
+class NameAndOccurrence(typing.NamedTuple):
+    name:str
+    occurrence:int
 
 class Indexer:
 
@@ -17,7 +23,10 @@ class Indexer:
 
     text_to_index:str
 
-    knowledge_base:typing.List[str]
+    knowledge_base:typing.List[str] = []
+
+    ## dict of entity labels and their occurrences
+    entity_occurrences:dict = {}
 
     ner = spacy.load("ja_core_news_lg")
 
@@ -97,7 +106,7 @@ class Indexer:
 ##-------------------start-of-get_names_from_all_sources()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def get_names_from_all_sources() -> typing.List[typing.List]:
+    def get_names_from_all_sources() -> typing.Tuple[typing.List[NameAndOccurrence], typing.List[NameAndOccurrence], typing.List[NameAndOccurrence]]:
         
         """
         
@@ -107,28 +116,90 @@ class Indexer:
 
         names_in_knowledge_base = []
         names_in_text_to_index = []
-        names_in_replacement_json = Indexer.get_names_from_replacement_json()
+        names_in_replacement_json = [NameAndOccurrence(name, 1) for name in Indexer.get_names_from_replacement_json()]
 
+        name_occurrences = {}
         for entry in Indexer.knowledge_base:
-            
             entry = entry.split("\n")
-
             for line in entry:
                 sentence = Indexer.ner(line)
                 for entity in sentence.ents:
-                    if(entity.label_ == "PERSON"):
-                        names_in_knowledge_base.append(entity.text)
 
+                    ## log label and occurrence
+                    Indexer.entity_occurrences[entity.label_] = Indexer.entity_occurrences.get(entity.label_, 0) + 1
+
+                    if(entity.label_ == "PERSON"):
+                        name_occurrences[entity.text] = name_occurrences.get(entity.text, 0) + 1
+                        names_in_knowledge_base.append(NameAndOccurrence(entity.text, name_occurrences[entity.text]))
+
+        name_occurrences = {}
         for entry in Indexer.text_to_index.split("\n"):
             sentence = Indexer.ner(entry)
             for entity in sentence.ents:
+
+                ## log label and occurrence
+                Indexer.entity_occurrences[entity.label_] = Indexer.entity_occurrences.get(entity.label_, 0) + 1
+
                 if(entity.label_ == "PERSON"):
-                    names_in_text_to_index.append(entity.text)
+                    name_occurrences[entity.text] = name_occurrences.get(entity.text, 0) + 1
+                    names_in_text_to_index.append(NameAndOccurrence(entity.text, name_occurrences[entity.text]))
 
-        names_in_knowledge_base = list(set(names_in_knowledge_base))
-        names_in_text_to_index = list(set(names_in_text_to_index))
+        return names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json
+    
+##-------------------start-of-perform_further_elimination()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    @staticmethod
+    def perform_further_elimination(names_in_knowledge_base:typing.List[NameAndOccurrence], 
+                                    names_in_text_to_index:typing.List[NameAndOccurrence], 
+                                    names_in_replacement_json:typing.List[NameAndOccurrence]) -> typing.Tuple[typing.List[NameAndOccurrence], typing.List[NameAndOccurrence], typing.List[NameAndOccurrence]]:
+        
+        """
+        
+        Performs further elimination of names.
 
-        return [names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json]
+        Elimination Criteria:
+        1. "Names" that consist of more punctuation than letters.
+        2. "Names" that are actual katakana words. See words.py
+        3. "Names" that appear to be onomatopoeia. (Repeating character sequences)
+
+        """
+
+        names_in_knowledge_base = [name for name in names_in_knowledge_base if not (KatakanaUtil.more_punctuation_than_japanese(name.name) or 
+                                                                                    KatakanaUtil.is_actual_word(name.name) or 
+                                                                                    KatakanaUtil.is_repeating_sequence(name.name))]
+        
+        names_in_text_to_index = [name for name in names_in_text_to_index if not (KatakanaUtil.more_punctuation_than_japanese(name.name) or 
+                                                                                  KatakanaUtil.is_actual_word(name.name) or 
+                                                                                  KatakanaUtil.is_repeating_sequence(name.name))]
+        
+        names_in_replacement_json = [name for name in names_in_replacement_json if not (KatakanaUtil.more_punctuation_than_japanese(name.name) or 
+                                                                                        KatakanaUtil.is_actual_word(name.name) or 
+                                                                                        KatakanaUtil.is_repeating_sequence(name.name))]
+
+
+        return names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json
+    
+##-------------------start-of-trim_honorifics()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    @staticmethod
+    def trim_honorifics(names_in_knowledge_base:typing.List[NameAndOccurrence], 
+                        names_in_text_to_index:typing.List[NameAndOccurrence], 
+                        names_in_replacement_json:typing.List[NameAndOccurrence]) -> typing.Tuple[typing.List[NameAndOccurrence], typing.List[NameAndOccurrence], typing.List[NameAndOccurrence]]:
+        
+        """
+        
+        Trims honorifics from names.
+
+        """
+
+        honorifics = Indexer.replacement_json.get('honorifics', [])
+
+        for honorific in honorifics:
+            names_in_knowledge_base = [NameAndOccurrence(name.name.replace(honorific, ""), name.occurrence) for name in names_in_knowledge_base]
+            names_in_text_to_index = [NameAndOccurrence(name.name.replace(honorific, ""), name.occurrence) for name in names_in_text_to_index]
+            names_in_replacement_json = [NameAndOccurrence(name.name.replace(honorific, ""), name.occurrence) for name in names_in_replacement_json]
+
+        return names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json
     
 ##-------------------start-of-index()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -145,10 +216,15 @@ class Indexer:
 
         names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer.get_names_from_all_sources()
 
+        names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer.perform_further_elimination(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
+
+        if(replacement_json):
+            names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer.trim_honorifics(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
+
         for name in names_in_text_to_index:
             
-            if(name not in names_in_knowledge_base and name not in names_in_replacement_json):
-                print(f"Name {name} not found in knowledge_base or replacement_json. Please add it to one of these sources.")
+            if(not any(other_name.name in name.name for other_name in names_in_knowledge_base) and not any(other_name.name in name.name for other_name in names_in_replacement_json)):
+                    print(f"Name {name.name} occurrence {name.occurrence} in text_to_index is not in the knowledge_base or the replacement_json")
 
-
-
+        ## print labels and their occurrences
+        print(Indexer.entity_occurrences)
