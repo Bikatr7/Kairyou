@@ -15,7 +15,7 @@ version = "v1.1.0"
 authors = [
   { name="Bikatr7", email="Tetralon07@gmail.com" },
 ]
-description = "Allow for easy preprocessing of Japanese text using NER/NLP from spaCy"
+description = "Quickly preprocesses Japanese text using NLP/NER from SpaCy for Japanese translation or other NLP tasks."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [

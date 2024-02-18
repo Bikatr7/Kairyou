@@ -9,8 +9,8 @@ import spacy
 
 ## custom modules
 from .katakana_util import KatakanaUtil
-from .util import get_elapsed_time, Name, ReplacementType, kudasai_blank_json, fukuin_blank_json
-from .exceptions import InvalidReplacementJsonKeys, InvalidReplacementJsonName, InvalidReplacementJsonPath
+from .util import validate_replacement_json, get_elapsed_time, Name, ReplacementType, kudasai_blank_json, fukuin_blank_json, kudasai_replacement_rules, fukuin_replacement_rules
+from .exceptions import  InvalidReplacementJsonName, InvalidReplacementJsonPath
 
 # -------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,83 +44,13 @@ class Kairyou:
     ## Fukuin is the format used by the original onegai processor and kroatoan's Fukuin. See https://github.com/Bikatr7/Kairyou/tree/main/examples/blank_fukuin.json
     json_type:typing.Literal["kudasai", "fukuin"] = "kudasai"
 
-    ## kudasai replacement rules
-    replacement_rules = [
-        # (title, json_key, is_name, replace_name, honorific_type)
-        ('Punctuation', 'kutouten', False, None, None),
-        ('Unicode', 'unicode', False, None, None),
-        ('Phrases', 'phrases', False, None, None),
-        ('Words', 'single_words', False, None, None),
-        ('Enhanced Check Whitelist', 'enhanced_check_whitelist',
-            True, ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
-        ('Full ReplacementType', 'full_names', True,
-            ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
-        ('Single ReplacementType', 'single_names', True,
-            ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
-        ('Name Like', 'name_like', True,
-            ReplacementType.ALL_NAMES, ReplacementType.NONE),
-    ]
+    replacement_rules:typing.List = kudasai_replacement_rules
 
     #----------------------------/
 
     ## The spacy NER model used for enhanced replacement checking.
     ner = spacy.load("ja_core_news_lg")
     
-# -------------------start-of-validate_replace_json()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    @staticmethod
-    def validate_replacement_json() -> None:
-
-        """
-
-        Validates the replacement json file.
-
-        Raises:
-        InvalidReplacementJsonKeys : If the replacement json file is missing keys.
-
-        """
-        
-        ## kudasai json
-        try:
-            assert "kutouten" in Kairyou.replacement_json
-            assert "unicode" in Kairyou.replacement_json
-            assert "phrases" in Kairyou.replacement_json
-            assert "single_words" in Kairyou.replacement_json
-            assert "enhanced_check_whitelist" in Kairyou.replacement_json
-            assert "full_names" in Kairyou.replacement_json
-            assert "single_names" in Kairyou.replacement_json
-            assert "name_like" in Kairyou.replacement_json
-            assert "honorifics" in Kairyou.replacement_json
-
-        except AssertionError:
-
-            ## fukuin json
-            try:
-                
-                assert "specials" in Kairyou.replacement_json
-                assert "basic" in Kairyou.replacement_json
-                assert "names" in Kairyou.replacement_json
-                assert "single-names" in Kairyou.replacement_json
-                assert "full-names" in Kairyou.replacement_json
-                assert "name-like" in Kairyou.replacement_json
-                assert "honorifics" in Kairyou.replacement_json
-
-                Kairyou.json_type = "fukuin"
-
-                ## fukuin replacement rules
-                Kairyou.replacement_rules = [
-                # title, json_key, is_name, replace_name, honorific_type
-                ('Special', 'specials', False, None, None),
-                ('Basic', 'basic', False, None, None),
-                ('Imp ReplacementType', 'names', True, ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
-                ('Remaining ReplacementType', 'full-names', True, ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
-                ('Single ReplacementType', 'single-names', True, ReplacementType.LAST_NAME, ReplacementType.LAST_NAME),
-                ('Name like', 'name-like', True, ReplacementType.LAST_NAME, ReplacementType.NONE),
-                ]
-    
-            except AssertionError:
-                raise InvalidReplacementJsonKeys
-
 ##-------------------start-of-reset_globals()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -141,21 +71,7 @@ class Kairyou:
 
         Kairyou.json_type = "kudasai"
  
-        Kairyou.replacement_rules = [
-        # (title, json_key, is_name, replace_name, honorific_type)
-        ('Punctuation', 'kutouten', False, None, None),
-        ('Unicode', 'unicode', False, None, None),
-        ('Phrases', 'phrases', False, None, None),
-        ('Words', 'single_words', False, None, None),
-        ('Enhanced Check Whitelist', 'enhanced_check_whitelist',
-            True, ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
-        ('Full ReplacementType', 'full_names', True,
-            ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
-        ('Single ReplacementType', 'single_names', True,
-            ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
-        ('Name Like', 'name_like', True,
-            ReplacementType.ALL_NAMES, ReplacementType.NONE),
-        ]
+        Kairyou.replacement_rules = kudasai_replacement_rules
 
 ##-------------------start-of-preprocess()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -207,7 +123,7 @@ class Kairyou:
             
             Kairyou.replacement_json = replacement_json ## type: ignore (it's a dict)
 
-            Kairyou.validate_replacement_json()
+            Kairyou.json_type, Kairyou.replacement_rules = validate_replacement_json(Kairyou.replacement_json)
 
         else:
             raise ValueError("The text to be preprocessed cannot be empty.")
@@ -228,7 +144,7 @@ class Kairyou:
 
         return Kairyou.text_to_preprocess, Kairyou.preprocessing_log, Kairyou.error_log
 
-# -------------------start-of-replace_non_katakana()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-replace_non_katakana()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
     def replace_non_katakana(replaced_names: dict) -> None:
