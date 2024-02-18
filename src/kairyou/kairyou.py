@@ -40,10 +40,11 @@ class Kairyou:
     ##------------------------/
 
     ## Supported types of json files.
-    ## Kudasai is kairyou's native json format. See https://github.com/Bikatr7/Kairyou/blob/main/examples/blank_replacements.json
+    ## Kudasai is kairyou's native json format. See https://github.com/Bikatr7/Kairyou/blob/main/examples/blank_kudasai.json
     ## Fukuin is the format used by the original onegai processor and kroatoan's Fukuin. See https://github.com/Bikatr7/Kairyou/tree/main/examples/blank_fukuin.json
     json_type:typing.Literal["kudasai", "fukuin"] = "kudasai"
 
+    ## kudasai replacement rules
     replacement_rules = [
         # (title, json_key, is_name, replace_name, honorific_type)
         ('Punctuation', 'kutouten', False, None, None),
@@ -106,6 +107,7 @@ class Kairyou:
 
                 Kairyou.json_type = "fukuin"
 
+                ## fukuin replacement rules
                 Kairyou.replacement_rules = [
                 # title, json_key, is_name, replace_name, honorific_type
                 ('Special', 'specials', False, None, None),
@@ -128,6 +130,8 @@ class Kairyou:
 
         Resets the global variables.
 
+        Resets both logs, the total replacements, json type, and replacement rules to their default values: Empty strings, 0, and Kudasai type respectively.
+
         """
 
         Kairyou.preprocessing_log = ""
@@ -136,6 +140,22 @@ class Kairyou:
         Kairyou.total_replacements = 0
 
         Kairyou.json_type = "kudasai"
+ 
+        Kairyou.replacement_rules = [
+        # (title, json_key, is_name, replace_name, honorific_type)
+        ('Punctuation', 'kutouten', False, None, None),
+        ('Unicode', 'unicode', False, None, None),
+        ('Phrases', 'phrases', False, None, None),
+        ('Words', 'single_words', False, None, None),
+        ('Enhanced Check Whitelist', 'enhanced_check_whitelist',
+            True, ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
+        ('Full ReplacementType', 'full_names', True,
+            ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
+        ('Single ReplacementType', 'single_names', True,
+            ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
+        ('Name Like', 'name_like', True,
+            ReplacementType.ALL_NAMES, ReplacementType.NONE),
+        ]
 
 ##-------------------start-of-preprocess()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -218,7 +238,7 @@ class Kairyou:
         Handles non-katakana replacements.
 
         Parameters:
-        replaced_names (dict - str) : ReplacementType we have replaced.
+        replaced_names (dict - str) : Names that have been replaced.
 
         """
 
@@ -276,7 +296,7 @@ class Kairyou:
         Handles katakana replacements.
 
         Parameters:
-        replaced_names (dict - str) : ReplacementType we have replaced.
+        replaced_names (dict - str) : Names we have replaced.
 
         """
 
