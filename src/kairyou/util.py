@@ -3,7 +3,7 @@ import enum
 import typing
 
 ## custom modules
-from exceptions import InvalidReplacementJsonKeys
+from .exceptions import InvalidReplacementJsonKeys
 
 ##-------------------start-of-validate_replace_json()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

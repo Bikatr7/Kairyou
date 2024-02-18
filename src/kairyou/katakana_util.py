@@ -124,3 +124,25 @@ class KatakanaUtil:
         """
 
         return all([char in KatakanaUtil.PUNCTUATION_CHARSET for char in string])
+
+##--------------------start-of-is_repeating_sequence()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+    @staticmethod
+    def is_repeating_sequence(word):
+        for i in range(1, len(word)//2 + 1):  # Only need to iterate to half the word length
+            ## Check every possible subsequence size
+            for ii in range(len(word) - i):
+                if word[ii:ii+i] == word[ii+i:ii+2*i]:
+                    return True
+                
+        return False
+    
+##--------------------start-of-more_punctuation_than_japanese()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def more_punctuation_than_japanese(text):
+
+        # Count non-punctuation (assumed to be Japanese) and punctuation characters
+        non_punctuation_count = sum(1 for char in text if char not in KatakanaUtil.PUNCTUATION_CHARSET)
+        punctuation_count = sum(1 for char in text if char in KatakanaUtil.PUNCTUATION_CHARSET)
+        return punctuation_count > non_punctuation_count

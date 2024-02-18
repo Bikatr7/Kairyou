@@ -9,7 +9,7 @@ import spacy
 
 ## custom modules
 from .katakana_util import KatakanaUtil
-from .util import validate_replacement_json, get_elapsed_time, Name, ReplacementType, kudasai_blank_json, fukuin_blank_json, kudasai_replacement_rules, fukuin_replacement_rules
+from .util import validate_replacement_json, get_elapsed_time, Name, ReplacementType, kudasai_blank_json, fukuin_blank_json, kudasai_replacement_rules
 from .exceptions import  InvalidReplacementJsonName, InvalidReplacementJsonPath
 
 # -------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -489,7 +489,7 @@ class Kairyou:
                 sentence = Kairyou.ner(jap_lines[i])
 
                 for entity in sentence.ents:
-                    if (entity.text == jap and entity.label_ == "PERSON"):
+                    if (entity.text == jap and entity.label_ == "PERSON" or entity.label_ == "PROPN"):
                         jap_replace_count += 1
                         jap_lines[i] = jap_lines[i][:entity.start_char] + \
                             replacement + jap_lines[i][entity.end_char:]
