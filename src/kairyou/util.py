@@ -78,7 +78,7 @@ class ReplacementType(enum.Flag):
 
 ##-------------------start-of-demo_json---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-blank_json={
+kudasai_blank_json={
 
     "honorifics": {
 
@@ -117,6 +117,37 @@ blank_json={
     }
     
   }
+
+fukuin_blank_json={
+  "specials": {
+
+  },
+  
+  "basic": {
+
+  },
+
+  "names": {
+
+  },
+
+  "single-names": {
+
+  },
+
+  "full-names": {
+
+  },
+
+  "name-like": {
+
+  },
+
+  "honorifics": {
+
+  }
+}
+
 
 demo_json={
   "honorifics": {

@@ -38,7 +38,11 @@ class InvalidReplacementJsonKeys(Exception):
 
     """
 
-    message = "Invalid replacement json file. Your json must contain the following keys: kutouten, unicode, phrases, single_words, enhanced_check_whitelist, full_names, single_names, name_like, and honorifics. Please see https://github.com/Bikatr7/Kairyou/tree/main/examples for an example replacement json file."
+    message = """
+    Invalid replacement json file. 
+    Your json must contain the following keys for a kudasai json table : kutouten, unicode, phrases, single_words, enhanced_check_whitelist, full_names, single_names, name_like, and honorifics, or specials, basic, names, full-names, single-names, and name-like for a fukuin table
+    Please see https://github.com/Bikatr7/Kairyou/tree/main/examples for an example replacement json file."
+    """
 
 ##-------------------start-of-InvalidReplacementJsonPath---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
