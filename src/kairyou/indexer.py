@@ -218,7 +218,7 @@ class Indexer:
 ##-------------------start-of-index()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def index(text_to_index:str, knowledge_base:str, replacement_json:str):
+    def index(text_to_index:str, knowledge_base:str, replacement_json:typing.Union[str, dict]) -> typing.List[NameAndOccurrence]:
 
         """
         
