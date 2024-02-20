@@ -97,7 +97,26 @@ class Indexer:
 
         for key in key_to_fetch_from:
 
-            entries.extend(Indexer.replacement_json[key])
+            ## entries can sometimes look like ("Yamanaka Ikuko": ["山中","郁子"])
+            ## so we need to split the japanese names and add them to the list
+
+            entry = Indexer.replacement_json.get(key, [])
+
+            if(isinstance(entry, tuple) or isinstance(entry, list)):
+
+                for name in entry:
+
+                    entries.append(name)
+
+            elif(isinstance(entry, dict)):
+                
+                for name in entry.values():
+
+                    entries.extend(name if isinstance(name, list) else [name])
+
+            else:
+
+                entries.append(entry)
 
         return list(set(entries))        
 
