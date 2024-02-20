@@ -22,6 +22,8 @@ class Indexer:
 
     knowledge_base:typing.List[str] = []
 
+    blacklisted_names:typing.List[str] = []
+
     ## dict of entity labels and their occurrences
     entity_occurrences:dict = {}
 
@@ -122,6 +124,9 @@ class Indexer:
                 sentence = Indexer.ner(line)
                 for entity in sentence.ents:
 
+                    if(entity.text in Indexer.blacklisted_names):
+                        continue
+
                     ## log label and occurrence
                     Indexer.entity_occurrences[entity.label_] = Indexer.entity_occurrences.get(entity.label_, 0) + 1
 
@@ -133,6 +138,9 @@ class Indexer:
         for entry in Indexer.text_to_index.split("\n"):
             sentence = Indexer.ner(entry)
             for entity in sentence.ents:
+
+                if(entity.text in Indexer.blacklisted_names):
+                    continue
 
                 ## log label and occurrence
                 Indexer.entity_occurrences[entity.label_] = Indexer.entity_occurrences.get(entity.label_, 0) + 1
@@ -215,7 +223,11 @@ class Indexer:
 ##-------------------start-of-index()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def index(text_to_index:str, knowledge_base:str, replacement_json:typing.Union[str, dict]) -> typing.List[NameAndOccurrence]:
+    def index(text_to_index:str, 
+              knowledge_base:str, 
+              replacement_json:typing.Union[str, dict],
+              blacklist:typing.List[str] = []
+              ) -> typing.List[NameAndOccurrence]:
 
         """
         
@@ -232,6 +244,9 @@ class Indexer:
         new_names (NameAndOccurrence): A list of names that are not in the knowledge_base or replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
 
         """
+
+        if(len(blacklist) > 0):
+            Indexer.blacklisted_names = blacklist
 
         new_names:typing.List[NameAndOccurrence] = []
 
