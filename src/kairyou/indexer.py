@@ -2,7 +2,6 @@
 import os
 import typing
 import json
-import typing
 
 ## third-party libraries
 import spacy
@@ -10,7 +9,7 @@ import spacy
 ## custom modules
 from .util import validate_replacement_json
 from .katakana_util import KatakanaUtil
-from .typing import NameAndOccurrence
+from .types import NameAndOccurrence
 
 class Indexer:
 
