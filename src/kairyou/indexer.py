@@ -266,6 +266,7 @@ class Indexer:
         text_to_index (str): The text to index. Can be a path to a text file, or just the text itself.
         knowledge_base (str): The knowledge base. Can be a path to a directory containing text files, a path to a text file, or just the text itself.
         replacement_json (str): The replacement json. Can be a path to a json, or as the json itself.
+        blacklist (list): A list of strings to ignore.
 
         Returns:
         new_names (NameAndOccurrence): A list of names that are not in the knowledge_base or replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
