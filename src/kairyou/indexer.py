@@ -2,22 +2,31 @@
 import os
 import typing
 import json
+import time
 
 ## third-party libraries
 import spacy
 
 ## custom modules
-from .util import validate_replacement_json
+from .util import validate_replacement_json, get_elapsed_time
 from .katakana_util import KatakanaUtil
 from .types import NameAndOccurrence
 
 class Indexer:
+
+    """
+
+    The global Indexer client for indexing names.
+
+    """
 
     replacement_json:dict
 
     json_type:typing.Literal["kudasai", "fukuin"]
 
     text_to_index:str
+
+    indexing_log = ""
 
     knowledge_base:typing.List[str] = []
 
@@ -245,7 +254,7 @@ class Indexer:
               knowledge_base:str, 
               replacement_json:typing.Union[str, dict],
               blacklist:typing.List[str] = []
-              ) -> typing.List[NameAndOccurrence]:
+              ) -> typing.Tuple[typing.List[NameAndOccurrence], str]:
 
         """
         
@@ -260,8 +269,11 @@ class Indexer:
 
         Returns:
         new_names (NameAndOccurrence): A list of names that are not in the knowledge_base or replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
-
+        Indexer.indexing_log (str): Log of the indexing process (names that were flagged as unique 'names' and which occurrence they were flagged at).
+        
         """
+
+        time_start = time.time()
 
         if(len(blacklist) > 0):
             Indexer.blacklisted_names = blacklist
@@ -285,5 +297,13 @@ class Indexer:
         for name in names_in_text_to_index:
             if(not Indexer.is_name_in_other_sources(name.name, all_names)):
                 new_names.append(name)
+                Indexer.indexing_log += (f"Name: {name.name} Occurrence: {name.occurrence} was flagged as a unique 'name'\n")
 
-        return new_names
+        time_end = time.time()
+
+        Indexer.indexing_log += "\nTotal Unique 'Names'  : " + \
+            str(len(new_names))
+        Indexer.indexing_log += "\nTime Elapsed : " + \
+            get_elapsed_time(time_start, time_end)
+
+        return new_names, Indexer.indexing_log
