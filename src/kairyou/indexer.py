@@ -301,6 +301,8 @@ class Indexer:
 
         time_end = time.time()
 
+        Indexer.indexing_log += "\nIgnored Strings: " + str(Indexer.blacklisted_names)
+
         Indexer.indexing_log += "\nTotal Unique 'Names'  : " + \
             str(len(new_names))
         Indexer.indexing_log += "\nTime Elapsed : " + \

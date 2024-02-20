@@ -144,12 +144,16 @@ input_text = "Your Japanese text here." ## or a path to a text file
 knowledge_base = ["more Japanese text here.", "even_more_japanese_text_here"] ## or a path to a text file or directory full of text files
 replacements_json = "path/to/your/replacement_rules.json"  ## or a dict of rules
 
-NamesAndOccurrences = Indexer.index(input_text, knowledge_base, replacements_json)
+You can optionally send a list of strings to ignore, but this is not required.
+
+NamesAndOccurrences, indexing_log = Indexer.index(input_text, knowledge_base, replacements_json) ## also takes in a list of strings to ignore, defaults to []
 ```
 
 NamesAndOccurrences is a list of named tuples, with the following fields:
 1. name: The name that was found.
 2. occurrence: The occurrence of the name in the input_text.
+
+Indexing_log is a string of the log of the indexing process. What was indexed, it's occurrence, what was ignored, and time elapsed.
 
 Index works with both Fukuin and Kudasai jsons.
 
