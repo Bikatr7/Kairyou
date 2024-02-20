@@ -10,10 +10,7 @@ import spacy
 ## custom modules
 from .util import validate_replacement_json
 from .katakana_util import KatakanaUtil
-
-class NameAndOccurrence(typing.NamedTuple):
-    name:str
-    occurrence:int
+from .typing import NameAndOccurrence
 
 class Indexer:
 
