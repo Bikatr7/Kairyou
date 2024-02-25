@@ -153,7 +153,7 @@ class KatakanaUtil:
 ##--------------------start-of-more_punctuation_than_japanese()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def more_punctuation_than_japanese(text:str) -> bool:
+    def is_more_punctuation_than_japanese(text:str) -> bool:
 
         """
 
@@ -171,3 +171,22 @@ class KatakanaUtil:
         non_punctuation_count = sum(1 for char in text if char not in KatakanaUtil.PUNCTUATION_CHARSET)
         punctuation_count = sum(1 for char in text if char in KatakanaUtil.PUNCTUATION_CHARSET)
         return punctuation_count > non_punctuation_count
+    
+##--------------------start-of-is_partialy_english()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    @staticmethod
+    def is_partialy_english(text:str) -> bool:
+        
+        """
+        
+        Checks if the given text is partially English.
+        
+        Parameters:
+        text (str) : the text to check.
+        
+        Returns:
+        bool : True if the text is partially English, False otherwise.
+        
+        """
+        
+        return any([char in string.ascii_letters for char in text])

@@ -192,20 +192,24 @@ class Indexer:
         Elimination Criteria:
         1. "Names" that consist of more punctuation than letters.
         2. "Names" that are actual katakana words. See words.py
-        3. "Names" that appear to be onomatopoeia. (Repeating character sequences)
+        3. "Names" that are partialy english. (Contains at least one english letter)
+        4. "Names" that appear to be onomatopoeia. (Repeating character sequences)
 
         """
 
-        names_in_knowledge_base = [name for name in names_in_knowledge_base if not (KatakanaUtil.more_punctuation_than_japanese(name.name) or 
+        names_in_knowledge_base = [name for name in names_in_knowledge_base if not (KatakanaUtil.is_more_punctuation_than_japanese(name.name) or 
                                                                                     KatakanaUtil.is_actual_word(name.name) or 
+                                                                                    KatakanaUtil.is_partialy_english(name.name) or
                                                                                     KatakanaUtil.is_repeating_sequence(name.name))]
         
-        names_in_text_to_index = [name for name in names_in_text_to_index if not (KatakanaUtil.more_punctuation_than_japanese(name.name) or 
+        names_in_text_to_index = [name for name in names_in_text_to_index if not (KatakanaUtil.is_more_punctuation_than_japanese(name.name) or 
                                                                                   KatakanaUtil.is_actual_word(name.name) or 
+                                                                                    KatakanaUtil.is_partialy_english(name.name) or
                                                                                   KatakanaUtil.is_repeating_sequence(name.name))]
         
-        names_in_replacement_json = [name for name in names_in_replacement_json if not (KatakanaUtil.more_punctuation_than_japanese(name.name) or 
+        names_in_replacement_json = [name for name in names_in_replacement_json if not (KatakanaUtil.is_more_punctuation_than_japanese(name.name) or 
                                                                                         KatakanaUtil.is_actual_word(name.name) or 
+                                                                                        KatakanaUtil.is_partialy_english(name.name) or
                                                                                         KatakanaUtil.is_repeating_sequence(name.name))]
 
 

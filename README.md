@@ -120,7 +120,9 @@ is_punctuation: Returns True if the input string is punctuation (Both Japanese a
 
 is_repeating_sequence: Returns True if the input string is just a repeating sequence of characters. (e.g. "ジロジロ")
 
-more_punctuation_than_japanese: Returns True if the input string has more punctuation than Japanese characters.
+is_more_punctuation_than_japanese: Returns True if the input string has more punctuation than Japanese characters.
+
+is_partially_english: Returns True if the input string has any English characters in it.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -133,18 +135,19 @@ What is considered a name is a bit complicated. But:
 2. Cannot have more punctuation than Japanese characters.
 3. Cannot be a repeating sequence of characters.
 4. Cannot be an actual Japanese Katakana word.
+5. Cannot have any english characters in it. (Names that are pre-replaced would have already been in the other texts, plus the JP NER model seems to have trouble with ENG in general)
 
 So, it'll return names that don't in the other texts.
 
 This can be done via index()
-```pyq
+```py
 from kairyou import Indexer
 
 input_text = "Your Japanese text here." ## or a path to a text file
 knowledge_base = ["more Japanese text here.", "even_more_japanese_text_here"] ## or a path to a text file or directory full of text files
 replacements_json = "path/to/your/replacement_rules.json"  ## or a dict of rules
 
-You can optionally send a list of strings to ignore, but this is not required.
+## You can optionally send a list of strings to ignore, but this is not required.
 
 NamesAndOccurrences, indexing_log = Indexer.index(input_text, knowledge_base, replacements_json) ## also takes in a list of strings to ignore, defaults to []
 ```
