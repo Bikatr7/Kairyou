@@ -25,37 +25,21 @@ def validate_replacement_json(replacement_json) -> typing.Tuple[typing.Literal["
 
     """
     
-    ## kudasai json
+    kudasai_keys = ["kutouten", "unicode", "phrases", "single_words", "enhanced_check_whitelist", "full_names", "single_names", "name_like", "honorifics"]
+    fukuin_keys = ["specials", "basic", "names", "single-names", "full-names", "name-like", "honorifics"]
+
     try:
-        assert "kutouten" in replacement_json
-        assert "unicode" in replacement_json
-        assert "phrases" in replacement_json
-        assert "single_words" in replacement_json
-        assert "enhanced_check_whitelist" in replacement_json
-        assert "full_names" in replacement_json
-        assert "single_names" in replacement_json
-        assert "name_like" in replacement_json
-        assert "honorifics" in replacement_json
-
-        return "kudasai", kudasai_replacement_rules
-
-    except AssertionError:
-
-        ## fukuin json
-        try:
-            
-            assert "specials" in replacement_json
-            assert "basic" in replacement_json
-            assert "names" in replacement_json
-            assert "single-names" in replacement_json
-            assert "full-names" in replacement_json
-            assert "name-like" in replacement_json
-            assert "honorifics" in replacement_json
-
+        if(all(key in replacement_json for key in kudasai_keys)):
+            return "kudasai", kudasai_replacement_rules
+        
+        elif(all(key in replacement_json for key in fukuin_keys)):
             return "fukuin", fukuin_replacement_rules
-
-        except AssertionError:
+        
+        else:
             raise InvalidReplacementJsonKeys
+        
+    except AssertionError:
+        raise InvalidReplacementJsonKeys
 
 ##-------------------start-of-get_elapsed_time()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
