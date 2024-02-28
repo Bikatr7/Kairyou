@@ -28,6 +28,13 @@ To get started with Kairyou, install the package via pip:
 pip install kairyou
 ```
 
+You also need to install the spaCy Japanese model, which can be done by running the following command:
+
+```bash
+pip install spacy
+python -m spacy download ja_core_news_lg
+```
+
 Then, you can preprocess Japanese text by importing Kairyou and/or KatakanaUtil/Indexer:
 ```python
 from kairyou import Kairyou, KatakanaUtil, Indexer
@@ -60,9 +67,8 @@ setuptools_scm>=6.0
 
 tomli
 
-spacy>=3.7.0,<3.8.0
+spacy==3.7.2
 
-ja_core_news_lg @ https://github.com/explosion/spacy-models/releases/download/ja_core_news_lg-3.7.0/ja_core_news_lg-3.7.0-py3-none-any.whl
 ```
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 

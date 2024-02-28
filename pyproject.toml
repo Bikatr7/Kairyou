@@ -4,14 +4,13 @@ requires = [
     'wheel',
     'setuptools_scm>=6.0',
     'tomli',
-    'spacy>=3.7.0,<3.8.0',
-    'ja_core_news_lg@https://github.com/explosion/spacy-models/releases/download/ja_core_news_lg-3.7.0/ja_core_news_lg-3.7.0-py3-none-any.whl'
+    'spacy==3.7.2',
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "kairyou"
-version = "v1.3.2"
+version = "v1.4"
 authors = [
   { name="Bikatr7", email="Tetralon07@gmail.com" },
 ]
