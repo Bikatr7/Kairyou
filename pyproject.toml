@@ -1,11 +1,11 @@
 [build-system]
 requires = [
-    "setuptools>=61.0",
-    "wheel",
-    "setuptools_scm>=6.0",
-    "tomli",
-    "spacy>=3.7.0,<3.8.0",
-    "ja_core_news_lg @ https://github.com/explosion/spacy-models/releases/download/ja_core_news_lg-3.7.0/ja_core_news_lg-3.7.0-py3-none-any.whl"
+    'setuptools>=61.0',
+    'wheel',
+    'setuptools_scm>=6.0',
+    'tomli',
+    '"spacy>=3.7.0,<3.8.0"',
+    'ja_core_news_lg@https://github.com/explosion/spacy-models/releases/download/ja_core_news_lg-3.7.0/ja_core_news_lg-3.7.0-py3-none-any.whl'
 ]
 build-backend = "setuptools.build_meta"
 
