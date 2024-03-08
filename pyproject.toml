@@ -9,11 +9,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 dependencies = [
-    "spacy>=3.7.0,<3.8.0"
+    "spacy>=3.7.0,<3.8.0",
+    "ja_core_news_lg @ https://github.com/explosion/spacy-models/releases/download/ja_core_news_lg-3.7.0/ja_core_news_lg-3.7.0-py3-none-any.whl#sha256=f08eecb4d40523045c9478ce59a67564fd71edd215f32c076fa91dc1f05cc7fd"
 ]
 
 name = "kairyou"
-version = "v1.40"
+version = "v1.4.1"
 authors = [
   { name="Bikatr7", email="Tetralon07@gmail.com" },
 ]
