@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 name = "kairyou"
-version = "v1.4.1"
+version = "v1.4.0"
 authors = [
   { name="Bikatr7", email="Tetralon07@gmail.com" },
 ]
