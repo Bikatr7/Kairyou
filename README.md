@@ -45,7 +45,7 @@ Follow the usage examples provided in the [Usage](#usage) section for detailed i
 
 **Installation**<a name="installation"></a>
 
-Python 3.8 or higher, I haven't tested it on anything lower. 3.7 might work, but I'm not sure. Feedback is welcome.
+Python 3.8+
 
 Kairyou can be installed using pip:
 
@@ -66,7 +66,7 @@ setuptools_scm>=6.0
 
 tomli
 
-"spacy>=3.7.0,<3.8.0"
+spacy>=3.7.0,<3.8.0
 
 ```
 ---------------------------------------------------------------------------------------------------------------------------------------------------
