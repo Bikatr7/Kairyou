@@ -8,7 +8,7 @@ import time
 import spacy
 
 ## custom modules
-from .util import validate_replacement_json, get_elapsed_time
+from .util import _validate_replacement_json, _get_elapsed_time
 from .katakana_util import KatakanaUtil
 from .types import NameAndOccurrence
 
@@ -40,7 +40,7 @@ class Indexer:
 ##-------------------start-of-load_static_data()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
     @staticmethod
-    def load_static_data(text_to_index:str, knowledge_base:str, replacement_json:typing.Union[str, dict]) -> None:
+    def _load_static_data(text_to_index:str, knowledge_base:str, replacement_json:typing.Union[str, dict]) -> None:
         
         """
         
@@ -81,10 +81,10 @@ class Indexer:
 
             Indexer.replacement_json = replacement_json
                         
-##-------------------start-of-get_names_from_replacement_json()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-_get_names_from_replacement_json()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def get_names_from_replacement_json():
+    def _get_names_from_replacement_json():
 
         """
         
@@ -94,7 +94,7 @@ class Indexer:
 
         entries = []
 
-        Indexer.json_type, _ = validate_replacement_json(Indexer.replacement_json)
+        Indexer.json_type, _ = _validate_replacement_json(Indexer.replacement_json)
 
         if(Indexer.json_type == "kudasai"):
 
@@ -129,10 +129,10 @@ class Indexer:
 
         return list(set(entries))        
 
-##-------------------start-of-get_names_from_all_sources()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-_get_names_from_all_sources()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def get_names_from_all_sources() -> typing.Tuple[typing.List[NameAndOccurrence], typing.List[NameAndOccurrence], typing.List[NameAndOccurrence]]:
+    def _get_names_from_all_sources() -> typing.Tuple[typing.List[NameAndOccurrence], typing.List[NameAndOccurrence], typing.List[NameAndOccurrence]]:
         
         """
         
@@ -142,7 +142,7 @@ class Indexer:
 
         names_in_knowledge_base = []
         names_in_text_to_index = []
-        names_in_replacement_json = [NameAndOccurrence(name, 1) for name in Indexer.get_names_from_replacement_json()]
+        names_in_replacement_json = [NameAndOccurrence(name, 1) for name in Indexer._get_names_from_replacement_json()]
 
         name_occurrences = {}
         for entry in Indexer.knowledge_base:
@@ -178,10 +178,10 @@ class Indexer:
 
         return names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json
     
-##-------------------start-of-perform_further_elimination()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-_perform_further_elimination()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
     @staticmethod
-    def perform_further_elimination(names_in_knowledge_base:typing.List[NameAndOccurrence], 
+    def _perform_further_elimination(names_in_knowledge_base:typing.List[NameAndOccurrence], 
                                     names_in_text_to_index:typing.List[NameAndOccurrence], 
                                     names_in_replacement_json:typing.List[NameAndOccurrence]) -> typing.Tuple[typing.List[NameAndOccurrence], typing.List[NameAndOccurrence], typing.List[NameAndOccurrence]]:
         
@@ -199,17 +199,17 @@ class Indexer:
 
         names_in_knowledge_base = [name for name in names_in_knowledge_base if not (KatakanaUtil.is_more_punctuation_than_japanese(name.name) or 
                                                                                     KatakanaUtil.is_actual_word(name.name) or 
-                                                                                    KatakanaUtil.is_partialy_english(name.name) or
+                                                                                    KatakanaUtil.is_partially_english(name.name) or
                                                                                     KatakanaUtil.is_repeating_sequence(name.name))]
         
         names_in_text_to_index = [name for name in names_in_text_to_index if not (KatakanaUtil.is_more_punctuation_than_japanese(name.name) or 
                                                                                   KatakanaUtil.is_actual_word(name.name) or 
-                                                                                    KatakanaUtil.is_partialy_english(name.name) or
+                                                                                    KatakanaUtil.is_partially_english(name.name) or
                                                                                   KatakanaUtil.is_repeating_sequence(name.name))]
         
         names_in_replacement_json = [name for name in names_in_replacement_json if not (KatakanaUtil.is_more_punctuation_than_japanese(name.name) or 
                                                                                         KatakanaUtil.is_actual_word(name.name) or 
-                                                                                        KatakanaUtil.is_partialy_english(name.name) or
+                                                                                        KatakanaUtil.is_partially_english(name.name) or
                                                                                         KatakanaUtil.is_repeating_sequence(name.name))]
 
 
@@ -218,7 +218,7 @@ class Indexer:
 ##-------------------start-of-trim_honorifics()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
     @staticmethod
-    def trim_honorifics(names_in_knowledge_base:typing.List[NameAndOccurrence], 
+    def _trim_honorifics(names_in_knowledge_base:typing.List[NameAndOccurrence], 
                         names_in_text_to_index:typing.List[NameAndOccurrence], 
                         names_in_replacement_json:typing.List[NameAndOccurrence]) -> typing.Tuple[typing.List[NameAndOccurrence], typing.List[NameAndOccurrence], typing.List[NameAndOccurrence]]:
         
@@ -240,7 +240,7 @@ class Indexer:
 ##-------------------start-of-is_name_in_other_sources()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def is_name_in_other_sources(name: str, all_names: typing.Set[str]) -> bool:
+    def _is_name_in_other_sources(name: str, all_names: typing.Set[str]) -> bool:
 
         """
 
@@ -285,14 +285,14 @@ class Indexer:
 
         new_names:typing.List[NameAndOccurrence] = []
 
-        Indexer.load_static_data(text_to_index, knowledge_base, replacement_json)
+        Indexer._load_static_data(text_to_index, knowledge_base, replacement_json)
 
-        names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer.get_names_from_all_sources()
+        names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer._get_names_from_all_sources()
 
-        names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer.perform_further_elimination(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
+        names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer._perform_further_elimination(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
 
         if(replacement_json):
-            names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer.trim_honorifics(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
+            names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer._trim_honorifics(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
 
         names_in_knowledge_base = set(name.name for name in names_in_knowledge_base)
         names_in_replacement_json = set(name.name for name in names_in_replacement_json)
@@ -300,7 +300,7 @@ class Indexer:
         all_names = names_in_knowledge_base | names_in_replacement_json
 
         for name in names_in_text_to_index:
-            if(not Indexer.is_name_in_other_sources(name.name, all_names)):
+            if(not Indexer._is_name_in_other_sources(name.name, all_names)):
                 new_names.append(name)
                 Indexer.indexing_log += (f"Name: {name.name} Occurrence: {name.occurrence} was flagged as a unique 'name'\n")
 
@@ -311,6 +311,6 @@ class Indexer:
         Indexer.indexing_log += "\nTotal Unique 'Names'  : " + \
             str(len(new_names))
         Indexer.indexing_log += "\nTime Elapsed : " + \
-            get_elapsed_time(time_start, time_end)
+            _get_elapsed_time(time_start, time_end)
 
         return new_names, Indexer.indexing_log

@@ -7,7 +7,7 @@ from .exceptions import InvalidReplacementJsonKeys
 
 ##-------------------start-of-validate_replace_json()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def validate_replacement_json(replacement_json) -> typing.Tuple[typing.Literal["kudasai", "fukuin"], list]:
+def _validate_replacement_json(replacement_json) -> typing.Tuple[typing.Literal["kudasai", "fukuin"], list]:
 
     """
 
@@ -41,9 +41,9 @@ def validate_replacement_json(replacement_json) -> typing.Tuple[typing.Literal["
     except AssertionError:
         raise InvalidReplacementJsonKeys
 
-##-------------------start-of-get_elapsed_time()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-_get_elapsed_time()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def get_elapsed_time(start:float, end:float) -> str:
+def _get_elapsed_time(start:float, end:float) -> str:
 
     """
 

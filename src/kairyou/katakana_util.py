@@ -67,10 +67,10 @@ class KatakanaUtil:
 
         return all([char in KatakanaUtil.KATAKANA_CHARSET for char in string])
 
-##--------------------start-of-get_katakana_entities()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##--------------------start-of-_get_katakana_entities()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def get_katakana_entities(names:dict) -> typing.List[Name]:
+    def _get_katakana_entities(names:dict) -> typing.List[Name]:
 
         """
 
@@ -172,10 +172,10 @@ class KatakanaUtil:
         punctuation_count = sum(1 for char in text if char in KatakanaUtil.PUNCTUATION_CHARSET)
         return punctuation_count > non_punctuation_count
     
-##--------------------start-of-is_partialy_english()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##--------------------start-of-is_partially_english()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
     @staticmethod
-    def is_partialy_english(text:str) -> bool:
+    def is_partially_english(text:str) -> bool:
         
         """
         
