@@ -89,8 +89,6 @@ preprocessed_text, preprocessing_log, error_log = Kairyou.preprocess(text, repla
 print(preprocessed_text)
 ```
 
-Kairyou is mostly just preprocess(), but there are other functions available, however they are not intended for direct use. The preprocess() function takes in a string of Japanese text and a path to JSON file or dictionary of replacement rules. It returns the preprocessed text, a log of the replacements made, and a log of any errors that occurred during the preprocessing (typically none).
-
 Currently, Kairyou supports two json types, "Kudasai" and "Fukuin". "Kudasai" is the native type and originated from that program, Fukuin is what the original onegai program used, as well as what the kroatoan's Fukuin program uses. No major differences in replacement are present between the two.
 
 [Blank Kudasai Json](examples/blank_kudasai.json)
