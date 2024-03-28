@@ -20,22 +20,22 @@ class Indexer:
 
     """
 
-    replacement_json:dict
+    _replacement_json:dict
 
-    json_type:typing.Literal["kudasai", "fukuin"]
+    _json_type:typing.Literal["kudasai", "fukuin"]
 
-    text_to_index:str
+    _text_to_index:str
 
     indexing_log = ""
 
-    knowledge_base:typing.List[str] = []
+    _knowledge_base:typing.List[str] = []
 
-    blacklisted_names:typing.List[str] = []
+    _blacklisted_names:typing.List[str] = []
 
     ## dict of entity labels and their occurrences
-    entity_occurrences:dict = {}
+    _entity_occurrences:dict = {}
 
-    ner = spacy.load("ja_core_news_lg")
+    _ner = spacy.load("ja_core_news_lg")
 
 ##-------------------start-of-load_static_data()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -51,10 +51,10 @@ class Indexer:
         ## text_to_index can be sent in a path to a text file, or just the text itself
         if(os.path.exists(text_to_index)):
             with open(text_to_index, "r", encoding="utf-8") as file:
-                Indexer.text_to_index = file.read()
+                Indexer._text_to_index = file.read()
 
         else:
-            Indexer.text_to_index = text_to_index
+            Indexer._text_to_index = text_to_index
 
         ## knowledge_base can be sent in a path to a directory containing text files, a path to a text file, or just the text itself            
         if(os.path.exists(knowledge_base)):
@@ -62,24 +62,30 @@ class Indexer:
                 for file in os.listdir(knowledge_base):
                     if(file.endswith(".txt")):
                       with open(os.path.join(knowledge_base, file), "r", encoding="utf-8") as file:
-                          Indexer.knowledge_base.append(file.read())
+                          Indexer._knowledge_base.append(file.read())
             else:
                 with open(knowledge_base, "r", encoding="utf-8") as file:
-                    Indexer.knowledge_base.append(file.read())
+                    Indexer._knowledge_base.append(file.read())
 
         else:
-            Indexer.knowledge_base.append(knowledge_base)
+            Indexer._knowledge_base.append(knowledge_base)
 
         ## replacement_json can be sent in a path to a json, or as the json itself
         if(isinstance(replacement_json, str)):
 
-            with open(replacement_json, "r", encoding="utf-8") as file:
+            try:
+                ## Try to load the string as JSON
+                Indexer._replacement_json = json.loads(replacement_json)
 
-                Indexer.replacement_json = json.load(file)
-
+            except json.JSONDecodeError:
+                ## If it fails, treat the string as a file path
+                if(os.path.isfile(replacement_json)):
+                    with open(replacement_json, "r", encoding="utf-8") as file:
+                        Indexer._replacement_json = json.load(file)
+                else:
+                    raise ValueError(f"{replacement_json} is not a valid JSON string or file path.")
         else:
-
-            Indexer.replacement_json = replacement_json
+            Indexer._replacement_json = replacement_json
                         
 ##-------------------start-of-_get_names_from_replacement_json()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -88,15 +94,15 @@ class Indexer:
 
         """
         
-        Fetches all names from the replacement_json and returns them as a list.
+        Fetches all names from the _replacement_json and returns them as a list.
 
         """
 
         entries = []
 
-        Indexer.json_type, _ = _validate_replacement_json(Indexer.replacement_json)
+        Indexer._json_type, _ = _validate_replacement_json(Indexer._replacement_json)
 
-        if(Indexer.json_type == "kudasai"):
+        if(Indexer._json_type == "kudasai"):
 
             key_to_fetch_from = ["single_names", "full_names"]
 
@@ -109,7 +115,7 @@ class Indexer:
             ## entries can sometimes look like ("Yamanaka Ikuko": ["山中","郁子"])
             ## so we need to split the japanese names and add them to the list
 
-            entry = Indexer.replacement_json.get(key, [])
+            entry = Indexer._replacement_json.get(key, [])
 
             if(isinstance(entry, tuple) or isinstance(entry, list)):
 
@@ -136,7 +142,7 @@ class Indexer:
         
         """
         
-        Fetches all names from the knowledge_base, text_to_index, and replacement_json and returns them as a list.
+        Fetches all names from the _knowledge_base, _text_to_index, and _replacement_json and returns them as a list.
 
         """
 
@@ -145,32 +151,32 @@ class Indexer:
         names_in_replacement_json = [NameAndOccurrence(name, 1) for name in Indexer._get_names_from_replacement_json()]
 
         name_occurrences = {}
-        for entry in Indexer.knowledge_base:
+        for entry in Indexer._knowledge_base:
             entry = entry.split("\n")
             for line in entry:
-                sentence = Indexer.ner(line)
+                sentence = Indexer._ner(line)
                 for entity in sentence.ents:
 
-                    if(entity.text in Indexer.blacklisted_names):
+                    if(entity.text in Indexer._blacklisted_names):
                         continue
 
                     ## log label and occurrence
-                    Indexer.entity_occurrences[entity.label_] = Indexer.entity_occurrences.get(entity.label_, 0) + 1
+                    Indexer._entity_occurrences[entity.label_] = Indexer._entity_occurrences.get(entity.label_, 0) + 1
 
                     if(entity.label_ == "PERSON"):
                         name_occurrences[entity.text] = name_occurrences.get(entity.text, 0) + 1
                         names_in_knowledge_base.append(NameAndOccurrence(entity.text, name_occurrences[entity.text]))
 
         name_occurrences = {}
-        for entry in Indexer.text_to_index.split("\n"):
-            sentence = Indexer.ner(entry)
+        for entry in Indexer._text_to_index.split("\n"):
+            sentence = Indexer._ner(entry)
             for entity in sentence.ents:
 
-                if(entity.text in Indexer.blacklisted_names):
+                if(entity.text in Indexer._blacklisted_names):
                     continue
 
                 ## log label and occurrence
-                Indexer.entity_occurrences[entity.label_] = Indexer.entity_occurrences.get(entity.label_, 0) + 1
+                Indexer._entity_occurrences[entity.label_] = Indexer._entity_occurrences.get(entity.label_, 0) + 1
 
                 if(entity.label_ == "PERSON"):
                     name_occurrences[entity.text] = name_occurrences.get(entity.text, 0) + 1
@@ -228,7 +234,7 @@ class Indexer:
 
         """
 
-        honorifics = Indexer.replacement_json.get('honorifics', [])
+        honorifics = Indexer._replacement_json.get('honorifics', [])
 
         for honorific in honorifics:
             names_in_knowledge_base = [NameAndOccurrence(name.name.replace(honorific, ""), name.occurrence) for name in names_in_knowledge_base]
@@ -244,7 +250,7 @@ class Indexer:
 
         """
 
-        Checks if a name is in the knowledge_base or replacement_json.
+        Checks if a name is in the _knowledge_base or _replacement_json.
 
         """
 
@@ -254,26 +260,26 @@ class Indexer:
 ##-------------------start-of-index()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def index(text_to_index:str, 
-              knowledge_base:str, 
-              replacement_json:typing.Union[str, dict],
+    def index(_text_to_index:str, 
+              _knowledge_base:str, 
+              _replacement_json:typing.Union[str, dict],
               blacklist:typing.List[str] = []
               ) -> typing.Tuple[typing.List[NameAndOccurrence], str]:
 
         """
         
-        Determines which names in the text_to_index are not in the knowledge_base or replacement_json and returns them as a list.
+        Determines which names in the _text_to_index are not in the _knowledge_base or _replacement_json and returns them as a list.
 
         Returns a tuple of tuples. That tuple has the name itself and the occurrence of the name that was flagged.
 
         Parameters:
-        text_to_index (str): The text to index. Can be a path to a text file, or just the text itself.
-        knowledge_base (str): The knowledge base. Can be a path to a directory containing text files, a path to a text file, or just the text itself.
-        replacement_json (str): The replacement json. Can be a path to a json, or as the json itself.
+        _text_to_index (str): The text to index. Can be a path to a text file, or just the text itself.
+        _knowledge_base (str): The knowledge base. Can be a path to a directory containing text files, a path to a text file, or just the text itself.
+        _replacement_json (str): The replacement json. Can be a path to a json, or as the json itself.
         blacklist (list): A list of strings to ignore.
 
         Returns:
-        new_names (NameAndOccurrence): A list of names that are not in the knowledge_base or replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
+        new_names (NameAndOccurrence): A list of names that are not in the _knowledge_base or _replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
         Indexer.indexing_log (str): Log of the indexing process (names that were flagged as unique 'names' and which occurrence they were flagged at).
         
         """
@@ -281,17 +287,17 @@ class Indexer:
         time_start = time.time()
 
         if(len(blacklist) > 0):
-            Indexer.blacklisted_names = blacklist
+            Indexer._blacklisted_names = blacklist
 
         new_names:typing.List[NameAndOccurrence] = []
 
-        Indexer._load_static_data(text_to_index, knowledge_base, replacement_json)
+        Indexer._load_static_data(_text_to_index, _knowledge_base, _replacement_json)
 
         names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer._get_names_from_all_sources()
 
         names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer._perform_further_elimination(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
 
-        if(replacement_json):
+        if(_replacement_json):
             names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer._trim_honorifics(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
 
         names_in_knowledge_base = set(name.name for name in names_in_knowledge_base)
@@ -306,7 +312,7 @@ class Indexer:
 
         time_end = time.time()
 
-        Indexer.indexing_log += "\nIgnored Strings: " + str(Indexer.blacklisted_names)
+        Indexer.indexing_log += "\nIgnored Strings: " + str(Indexer._blacklisted_names)
 
         Indexer.indexing_log += "\nTotal Unique 'Names'  : " + \
             str(len(new_names))
