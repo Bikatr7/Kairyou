@@ -1,6 +1,17 @@
+##-------------------start-of-KairyouException---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+class KairyouException(Exception):
+
+    """
+    
+    Base exception class for Kairyou.
+    
+    """
+
 ##-------------------start-of-InvalidReplacementJsonName---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class InvalidReplacementJsonName(Exception):
+class InvalidReplacementJsonName(KairyouException):
 
     """
 
@@ -27,7 +38,7 @@ class InvalidReplacementJsonName(Exception):
 
 ##-------------------start-of-InvalidReplacementJsonKeys---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class InvalidReplacementJsonKeys(Exception):
+class InvalidReplacementJsonKeys(KairyouException):
 
     """
     
@@ -43,7 +54,7 @@ class InvalidReplacementJsonKeys(Exception):
 
 ##-------------------start-of-InvalidReplacementJsonPath---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class InvalidReplacementJsonPath(Exception):
+class InvalidReplacementJsonPath(KairyouException):
 
     """
 
