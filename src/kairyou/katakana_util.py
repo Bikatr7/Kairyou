@@ -65,7 +65,7 @@ class KatakanaUtil:
 
         """
 
-        return all([char in KatakanaUtil.KATAKANA_CHARSET for char in string])
+        return all([_char in KatakanaUtil.KATAKANA_CHARSET for _char in string])
 
 ##--------------------start-of-_get_katakana_entities()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -81,7 +81,7 @@ class KatakanaUtil:
 
         """
 
-        return [Name(jap=j, eng=e) for e, j in names.items() if KatakanaUtil.is_katakana_only(j)]
+        return [Name(jap=_j, eng=_e) for _e, _j in names.items() if KatakanaUtil.is_katakana_only(_j)]
     
 ##--------------------start-of-is_actual_word()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -100,11 +100,7 @@ class KatakanaUtil:
 
         """
 
-        if(jap in KatakanaUtil.katakana_words):
-            return True
-        
-        else:
-            return False
+        return jap in KatakanaUtil.katakana_words
         
 ##--------------------start-of-is_punctuation()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -167,10 +163,11 @@ class KatakanaUtil:
 
         """
 
-        # Count non-punctuation (assumed to be Japanese) and punctuation characters
-        non_punctuation_count = sum(1 for char in text if char not in KatakanaUtil.PUNCTUATION_CHARSET)
-        punctuation_count = sum(1 for char in text if char in KatakanaUtil.PUNCTUATION_CHARSET)
-        return punctuation_count > non_punctuation_count
+        ## Count non-punctuation (assumed to be Japanese) and punctuation characters
+        _non_punctuation_count = sum(1 for _char in text if _char not in KatakanaUtil.PUNCTUATION_CHARSET)
+        _punctuation_count = sum(1 for _char in text if _char in KatakanaUtil.PUNCTUATION_CHARSET)
+        
+        return _punctuation_count > _non_punctuation_count
     
 ##--------------------start-of-is_partially_english()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -189,4 +186,4 @@ class KatakanaUtil:
         
         """
         
-        return any([char in string.ascii_letters for char in text])
+        return any([_char in string.ascii_letters for _char in text])

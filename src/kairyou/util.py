@@ -17,7 +17,7 @@ def _validate_replacement_json(replacement_json) -> typing.Tuple[typing.Literal[
     replacement_json (dict) : The replacement json file.
 
     Returns:
-    json_type (string) : The type of replacement json file.
+    json_type (string) : The type of replacement json file. Either "kudasai" or "fukuin".
     replacement_rules (list) : The replacement rules for the replacement json file.
 
     Raises:
@@ -25,15 +25,15 @@ def _validate_replacement_json(replacement_json) -> typing.Tuple[typing.Literal[
 
     """
     
-    kudasai_keys = ["kutouten", "unicode", "phrases", "single_words", "enhanced_check_whitelist", "full_names", "single_names", "name_like", "honorifics"]
-    fukuin_keys = ["specials", "basic", "names", "single-names", "full-names", "name-like", "honorifics"]
+    _kudasai_keys = ["kutouten", "unicode", "phrases", "single_words", "enhanced_check_whitelist", "full_names", "single_names", "name_like", "honorifics"]
+    _fukuin_keys = ["specials", "basic", "names", "single-names", "full-names", "name-like", "honorifics"]
 
     try:
-        if(all(key in replacement_json for key in kudasai_keys)):
-            return "kudasai", kudasai_replacement_rules
+        if(all(_key in replacement_json for _key in _kudasai_keys)):
+            return "kudasai", _kudasai_replacement_rules
         
-        elif(all(key in replacement_json for key in fukuin_keys)):
-            return "fukuin", fukuin_replacement_rules
+        elif(all(_key in replacement_json for _key in _fukuin_keys)):
+            return "fukuin", _fukuin_replacement_rules
         
         else:
             raise InvalidReplacementJsonKeys
@@ -54,21 +54,21 @@ def _get_elapsed_time(start:float, end:float) -> str:
     end (float) : End time.
 
     Returns:
-    print_value (string): The elapsed time in a human-readable format.
+    _print_value (string): The elapsed time in a human-readable format.
 
     """
 
-    elapsed_time = end - start
-    print_value = ""
+    _elapsed_time = end - start
+    _print_value = ""
 
-    if(elapsed_time < 60.0):
-        print_value = str(round(elapsed_time, 2)) + " seconds"
-    elif(elapsed_time < 3600.0):
-        print_value = str(round(elapsed_time / 60, 2)) + " minutes"
+    if(_elapsed_time < 60.0):
+        _print_value = str(round(_elapsed_time, 2)) + " seconds"
+    elif(_elapsed_time < 3600.0):
+        _print_value = str(round(_elapsed_time / 60, 2)) + " minutes"
     else:
-        print_value = str(round(elapsed_time / 3600, 2)) + " hours"
+        _print_value = str(round(_elapsed_time / 3600, 2)) + " hours"
 
-    return print_value
+    return _print_value
 
 ##-------------------start-of-Name---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -117,7 +117,7 @@ class ReplacementType(enum.Flag):
 
 ##-------------------start-of-vars---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-kudasai_replacement_rules = [
+_kudasai_replacement_rules = [
 # (title, json_key, is_name, replace_name, honorific_type)
 ('Punctuation', 'kutouten', False, None, None),
 ('Unicode', 'unicode', False, None, None),
@@ -133,7 +133,7 @@ kudasai_replacement_rules = [
     ReplacementType.ALL_NAMES, ReplacementType.NONE),
 ]
 
-fukuin_replacement_rules = [
+_fukuin_replacement_rules = [
 # title, json_key, is_name, replace_name, honorific_type
 ('Special', 'specials', False, None, None),
 ('Basic', 'basic', False, None, None),
@@ -143,7 +143,7 @@ fukuin_replacement_rules = [
 ('Name like', 'name-like', True, ReplacementType.LAST_NAME, ReplacementType.NONE),
 ]
 
-kudasai_blank_json={
+_kudasai_blank_json={
 
     "honorifics": {
 
@@ -183,7 +183,7 @@ kudasai_blank_json={
     
   }
 
-fukuin_blank_json={
+_fukuin_blank_json={
   "specials": {
 
   },
