@@ -1,4 +1,4 @@
-katakana_words = """
+_katakana_words = """
 ァ
 ア
 アイ

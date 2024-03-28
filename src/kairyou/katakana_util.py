@@ -4,7 +4,7 @@ import typing
 
 ## custom modules
 from .util import Name
-from .words import katakana_words as words
+from .words import _katakana_words as words
 
 ##--------------------start-of-KatakanaUtil------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
