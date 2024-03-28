@@ -90,50 +90,53 @@ class Indexer:
 ##-------------------start-of-_get_names_from_replacement_json()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def _get_names_from_replacement_json():
+    def _get_names_from_replacement_json() -> typing.List[str]:
 
         """
         
-        Fetches all names from the _replacement_json and returns them as a list.
+        Fetches all names from the replacement json and returns them as a list.
+
+        Returns:
+        list (str) : A list of names from the replacement json.
 
         """
 
-        entries = []
+        _entries = []
 
         Indexer._json_type, _ = _validate_replacement_json(Indexer._replacement_json)
 
         if(Indexer._json_type == "kudasai"):
 
-            key_to_fetch_from = ["single_names", "full_names"]
+            _key_to_fetch_from = ["single_names", "full_names"]
 
         else:
             
-            key_to_fetch_from = ["names", "single-names", "full-names"]
+            _key_to_fetch_from = ["names", "single-names", "full-names"]
 
-        for key in key_to_fetch_from:
+        for _key in _key_to_fetch_from:
 
             ## entries can sometimes look like ("Yamanaka Ikuko": ["山中","郁子"])
             ## so we need to split the japanese names and add them to the list
 
-            entry = Indexer._replacement_json.get(key, [])
+            _entry = Indexer._replacement_json.get(_key, [])
 
-            if(isinstance(entry, tuple) or isinstance(entry, list)):
+            if(isinstance(_entry, tuple) or isinstance(_entry, list)):
 
-                for name in entry:
+                for _name in _entry:
 
-                    entries.append(name)
+                    _entries.append(_name)
 
-            elif(isinstance(entry, dict)):
+            elif(isinstance(_entry, dict)):
                 
-                for name in entry.values():
+                for _name in _entry.values():
 
-                    entries.extend(name if isinstance(name, list) else [name])
+                    _entries.extend(_name if isinstance(_name, list) else [_name])
 
             else:
 
-                entries.append(entry)
+                _entries.append(_entry)
 
-        return list(set(entries))        
+        return list(set(_entries))        
 
 ##-------------------start-of-_get_names_from_all_sources()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -142,47 +145,52 @@ class Indexer:
         
         """
         
-        Fetches all names from the _knowledge_base, _text_to_index, and _replacement_json and returns them as a list.
+        Fetches all names from the knowledge base, text to index, and replacement json and returns them as a list.
+
+        Returns:
+        names_in_knowledge_base (NameAndOccurrence): A list of names from the knowledge base.
+        names_in_text_to_index (NameAndOccurrence): A list of names from the text to index.
+        names_in_replacement_json (NameAndOccurrence): A list of names from the replacement json.
 
         """
 
-        names_in_knowledge_base = []
-        names_in_text_to_index = []
-        names_in_replacement_json = [NameAndOccurrence(name, 1) for name in Indexer._get_names_from_replacement_json()]
+        _names_in_knowledge_base = []
+        _names_in_text_to_index = []
+        _names_in_replacement_json = [NameAndOccurrence(_name, 1) for _name in Indexer._get_names_from_replacement_json()]
 
-        name_occurrences = {}
-        for entry in Indexer._knowledge_base:
-            entry = entry.split("\n")
-            for line in entry:
-                sentence = Indexer._ner(line)
-                for entity in sentence.ents:
+        _name_occurrences = {}
+        for _entry in Indexer._knowledge_base:
+            _entry = _entry.split("\n")
+            for _line in _entry:
+                _sentence = Indexer._ner(_line)
+                for _entity in _sentence.ents:
 
-                    if(entity.text in Indexer._blacklisted_names):
+                    if(_entity.text in Indexer._blacklisted_names):
                         continue
 
                     ## log label and occurrence
-                    Indexer._entity_occurrences[entity.label_] = Indexer._entity_occurrences.get(entity.label_, 0) + 1
+                    Indexer._entity_occurrences[_entity.label_] = Indexer._entity_occurrences.get(_entity.label_, 0) + 1
 
-                    if(entity.label_ == "PERSON"):
-                        name_occurrences[entity.text] = name_occurrences.get(entity.text, 0) + 1
-                        names_in_knowledge_base.append(NameAndOccurrence(entity.text, name_occurrences[entity.text]))
+                    if(_entity.label_ == "PERSON"):
+                        _name_occurrences[_entity.text] = _name_occurrences.get(_entity.text, 0) + 1
+                        _names_in_knowledge_base.append(NameAndOccurrence(_entity.text, _name_occurrences[_entity.text]))
 
-        name_occurrences = {}
-        for entry in Indexer._text_to_index.split("\n"):
-            sentence = Indexer._ner(entry)
-            for entity in sentence.ents:
+        _name_occurrences = {}
+        for _entry in Indexer._text_to_index.split("\n"):
+            _sentence = Indexer._ner(_entry)
+            for _entity in _sentence.ents:
 
-                if(entity.text in Indexer._blacklisted_names):
+                if(_entity.text in Indexer._blacklisted_names):
                     continue
 
                 ## log label and occurrence
-                Indexer._entity_occurrences[entity.label_] = Indexer._entity_occurrences.get(entity.label_, 0) + 1
+                Indexer._entity_occurrences[_entity.label_] = Indexer._entity_occurrences.get(_entity.label_, 0) + 1
 
-                if(entity.label_ == "PERSON"):
-                    name_occurrences[entity.text] = name_occurrences.get(entity.text, 0) + 1
-                    names_in_text_to_index.append(NameAndOccurrence(entity.text, name_occurrences[entity.text]))
+                if(_entity.label_ == "PERSON"):
+                    _name_occurrences[_entity.text] = _name_occurrences.get(_entity.text, 0) + 1
+                    _names_in_text_to_index.append(NameAndOccurrence(_entity.text, _name_occurrences[_entity.text]))
 
-        return names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json
+        return _names_in_knowledge_base, _names_in_text_to_index, _names_in_replacement_json
     
 ##-------------------start-of-_perform_further_elimination()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -201,25 +209,37 @@ class Indexer:
         3. "Names" that are partialy english. (Contains at least one english letter)
         4. "Names" that appear to be onomatopoeia. (Repeating character sequences)
 
+        Parameters:
+        names_in_knowledge_base (NameAndOccurrence): A list of names from the knowledge base.
+        names_in_text_to_index (NameAndOccurrence): A list of names from the text to index.
+        names_in_replacement_json (NameAndOccurrence): A list of names from the replacement json.
+
+        Returns:
+        names_in_knowledge_base (NameAndOccurrence): A list of names from the knowledge base.
+        names_in_text_to_index (NameAndOccurrence): A list of names from the text to index.
+        names_in_replacement_json (NameAndOccurrence): A list of names from the replacement json.
+
         """
 
-        names_in_knowledge_base = [name for name in names_in_knowledge_base if not (KatakanaUtil.is_more_punctuation_than_japanese(name.name) or 
-                                                                                    KatakanaUtil.is_actual_word(name.name) or 
-                                                                                    KatakanaUtil.is_partially_english(name.name) or
-                                                                                    KatakanaUtil.is_repeating_sequence(name.name))]
+        _names_in_knowledge_base = [_name for _name in names_in_knowledge_base if not (
+                                                KatakanaUtil.is_more_punctuation_than_japanese(_name.name) or 
+                                                KatakanaUtil.is_actual_word(_name.name) or 
+                                                KatakanaUtil.is_partially_english(_name.name) or
+                                                KatakanaUtil.is_repeating_sequence(_name.name))]
         
-        names_in_text_to_index = [name for name in names_in_text_to_index if not (KatakanaUtil.is_more_punctuation_than_japanese(name.name) or 
-                                                                                  KatakanaUtil.is_actual_word(name.name) or 
-                                                                                    KatakanaUtil.is_partially_english(name.name) or
-                                                                                  KatakanaUtil.is_repeating_sequence(name.name))]
+        _names_in_text_to_index = [_name for _name in names_in_text_to_index if not (
+                                                KatakanaUtil.is_more_punctuation_than_japanese(_name.name) or 
+                                                KatakanaUtil.is_actual_word(_name.name) or 
+                                                KatakanaUtil.is_partially_english(_name.name) or
+                                                KatakanaUtil.is_repeating_sequence(_name.name))]
         
-        names_in_replacement_json = [name for name in names_in_replacement_json if not (KatakanaUtil.is_more_punctuation_than_japanese(name.name) or 
-                                                                                        KatakanaUtil.is_actual_word(name.name) or 
-                                                                                        KatakanaUtil.is_partially_english(name.name) or
-                                                                                        KatakanaUtil.is_repeating_sequence(name.name))]
+        _names_in_replacement_json = [_name for _name in names_in_replacement_json if not (
+                                                KatakanaUtil.is_more_punctuation_than_japanese(_name.name) or 
+                                                KatakanaUtil.is_actual_word(_name.name) or 
+                                                KatakanaUtil.is_partially_english(_name.name) or
+                                                KatakanaUtil.is_repeating_sequence(_name.name))]
 
-
-        return names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json
+        return _names_in_knowledge_base, _names_in_text_to_index, _names_in_replacement_json
     
 ##-------------------start-of-trim_honorifics()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -232,91 +252,108 @@ class Indexer:
         
         Trims honorifics from names.
 
+        Parameters:
+        names_in_knowledge_base (NameAndOccurrence): A list of names from the knowledge base.
+        names_in_text_to_index (NameAndOccurrence): A list of names from the text to index.
+        names_in_replacement_json (NameAndOccurrence): A list of names from the replacement json.
+
+        Returns:
+        names_in_knowledge_base (NameAndOccurrence): A list of names from the knowledge base.
+        names_in_text_to_index (NameAndOccurrence): A list of names from the text to index.
+        names_in_replacement_json (NameAndOccurrence): A list of names from the replacement json.
+
         """
 
-        honorifics = Indexer._replacement_json.get('honorifics', [])
+        ## both kudasai and fukuin jsons have honorifics
+        _honorifics = Indexer._replacement_json.get('honorifics', [])
 
-        for honorific in honorifics:
-            names_in_knowledge_base = [NameAndOccurrence(name.name.replace(honorific, ""), name.occurrence) for name in names_in_knowledge_base]
-            names_in_text_to_index = [NameAndOccurrence(name.name.replace(honorific, ""), name.occurrence) for name in names_in_text_to_index]
-            names_in_replacement_json = [NameAndOccurrence(name.name.replace(honorific, ""), name.occurrence) for name in names_in_replacement_json]
+        for _honorific in _honorifics:
+            _names_in_knowledge_base = [NameAndOccurrence(_name.name.replace(_honorific, ""), _name.occurrence) for _name in names_in_knowledge_base]
+            _names_in_text_to_index = [NameAndOccurrence(_name.name.replace(_honorific, ""), _name.occurrence) for _name in names_in_text_to_index]
+            _names_in_replacement_json = [NameAndOccurrence(_name.name.replace(_honorific, ""), _name.occurrence) for _name in names_in_replacement_json]
 
-        return names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json
+        return _names_in_knowledge_base, _names_in_text_to_index, _names_in_replacement_json
     
 ##-------------------start-of-is_name_in_other_sources()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def _is_name_in_other_sources(name: str, all_names: typing.Set[str]) -> bool:
+    def _is_name_in_other_sources(name:str, all_names:typing.Set[str]) -> bool:
 
         """
 
-        Checks if a name is in the _knowledge_base or _replacement_json.
+        Checks if a name is in the knowledge base or replacement json.
+
+        Parameters:
+        name (str): The name to check.
+        all_names (set): A set of all names.
+
+        Returns:
+        bool: True if the name is in the knowledge base or replacement json, False otherwise.
 
         """
 
-
-        return any(other_name in name for other_name in all_names)
+        return any(_other_name in name for _other_name in all_names)
     
 ##-------------------start-of-index()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def index(_text_to_index:str, 
-              _knowledge_base:str, 
-              _replacement_json:typing.Union[str, dict],
+    def index(text_to_index:str, 
+              knowledge_base:str, 
+              replacement_json:typing.Union[str, dict],
               blacklist:typing.List[str] = []
               ) -> typing.Tuple[typing.List[NameAndOccurrence], str]:
 
         """
         
-        Determines which names in the _text_to_index are not in the _knowledge_base or _replacement_json and returns them as a list.
+        Determines which names in the text to index are not in the knowledge base or replacement json and returns them as a list of NameAndOccurrence named tuples.
 
         Returns a tuple of tuples. That tuple has the name itself and the occurrence of the name that was flagged.
 
         Parameters:
-        _text_to_index (str): The text to index. Can be a path to a text file, or just the text itself.
-        _knowledge_base (str): The knowledge base. Can be a path to a directory containing text files, a path to a text file, or just the text itself.
-        _replacement_json (str): The replacement json. Can be a path to a json, or as the json itself.
-        blacklist (list): A list of strings to ignore.
+        text_to_index (str) : The text to index. Can be a path to a text file, or just the text itself.
+        knowledge_base (str) : The knowledge base. Can be a path to a directory containing text files, a path to a text file, or just the text itself.
+        replacement_json (str) : The replacement json. Can be a path to a json, or as the json itself.
+        blacklist (list - str) : A list of strings to ignore.
 
         Returns:
-        new_names (NameAndOccurrence): A list of names that are not in the _knowledge_base or _replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
+        new_names (NameAndOccurrence): A list of names that are not in the knowledge base or replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
         Indexer.indexing_log (str): Log of the indexing process (names that were flagged as unique 'names' and which occurrence they were flagged at).
         
         """
 
-        time_start = time.time()
+        _time_start = time.time()
 
         if(len(blacklist) > 0):
             Indexer._blacklisted_names = blacklist
 
         new_names:typing.List[NameAndOccurrence] = []
 
-        Indexer._load_static_data(_text_to_index, _knowledge_base, _replacement_json)
+        Indexer._load_static_data(text_to_index, knowledge_base, replacement_json)
 
-        names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer._get_names_from_all_sources()
+        _names_in_knowledge_base, _names_in_text_to_index, _names_in_replacement_json = Indexer._get_names_from_all_sources()
 
-        names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer._perform_further_elimination(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
+        _names_in_knowledge_base, _names_in_text_to_index, _names_in_replacement_json = Indexer._perform_further_elimination(_names_in_knowledge_base, _names_in_text_to_index, _names_in_replacement_json)
 
-        if(_replacement_json):
-            names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json = Indexer._trim_honorifics(names_in_knowledge_base, names_in_text_to_index, names_in_replacement_json)
+        if(replacement_json):
+            _names_in_knowledge_base, _names_in_text_to_index, _names_in_replacement_json = Indexer._trim_honorifics(_names_in_knowledge_base, _names_in_text_to_index, _names_in_replacement_json)
 
-        names_in_knowledge_base = set(name.name for name in names_in_knowledge_base)
-        names_in_replacement_json = set(name.name for name in names_in_replacement_json)
+        _names_in_knowledge_base = set(_name.name for _name in _names_in_knowledge_base)
+        _names_in_replacement_json = set(_name.name for _name in _names_in_replacement_json)
 
-        all_names = names_in_knowledge_base | names_in_replacement_json
+        _all_names = _names_in_knowledge_base | _names_in_replacement_json
 
-        for name in names_in_text_to_index:
-            if(not Indexer._is_name_in_other_sources(name.name, all_names)):
-                new_names.append(name)
-                Indexer.indexing_log += (f"Name: {name.name} Occurrence: {name.occurrence} was flagged as a unique 'name'\n")
+        for _name in _names_in_text_to_index:
+            if(not Indexer._is_name_in_other_sources(_name.name, _all_names)):
+                new_names.append(_name)
+                Indexer.indexing_log += (f"Name: {_name.name} Occurrence: {_name.occurrence} was flagged as a unique 'name'\n")
 
-        time_end = time.time()
+        _time_end = time.time()
 
         Indexer.indexing_log += "\nIgnored Strings: " + str(Indexer._blacklisted_names)
 
         Indexer.indexing_log += "\nTotal Unique 'Names'  : " + \
             str(len(new_names))
         Indexer.indexing_log += "\nTime Elapsed : " + \
-            _get_elapsed_time(time_start, time_end)
+            _get_elapsed_time(_time_start, _time_end)
 
         return new_names, Indexer.indexing_log
