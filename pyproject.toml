@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 name = "kairyou"
-version = "v1.4.2"
+version = "v1.5.0"
 authors = [
   { name="Bikatr7", email="Tetralon07@gmail.com" },
 ]
@@ -22,7 +22,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3.8",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
     "Operating System :: OS Independent",
 ]
 
