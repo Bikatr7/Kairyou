@@ -1,10 +1,14 @@
+## Copyright Bikatr7 (https://github.com/Bikatr7)
+## Use of this source code is governed by a GNU Lesser General Public License v2.1
+## license that can be found in the LICENSE file.
+
 ## built-in libraries
 import string
 import typing
 
 ## custom modules
 from .util import Name
-from .words import _katakana_words as words
+from .words import _katakana_words as _words
 
 ##--------------------start-of-KatakanaUtil------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -16,7 +20,7 @@ class KatakanaUtil:
 
     """
 
-    katakana_words = words.split("\n")
+    katakana_words = _words.split("\n")
 
     ## https://en.wikipedia.org/wiki/Katakana_(Unicode_block)
     KATAKANA_CHARSET = {
