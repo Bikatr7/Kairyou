@@ -45,7 +45,7 @@ Follow the usage examples provided in the [Usage](#usage) section for detailed i
 
 **Installation**<a name="installation"></a>
 
-Python 3.8+
+Python 3.10+
 
 Kairyou can be installed using pip:
 
