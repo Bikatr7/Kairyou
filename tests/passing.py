@@ -22,6 +22,36 @@ def main():
 
     preprocessed_text, preprocessing_log, error_log = Kairyou.preprocess(text, "tests//testing_replacements.json")
 
+    katakana_only = KatakanaUtil.is_katakana_only("テスト")
+
+    not_katakana_only = KatakanaUtil.is_katakana_only("テストtest")
+
+    punctuation_string = ".。。"
+
+    length_of_katakana_words = len(KatakanaUtil.katakana_words)
+
+    if(not katakana_only or not_katakana_only):
+        print(katakana_only, not_katakana_only)
+        raise ValueError("Test failed")
+    
+    if(length_of_katakana_words < 5000):
+        raise ValueError("Test failed")
+    
+    if(not KatakanaUtil.is_punctuation(punctuation_string)):
+        raise ValueError("Test failed")
+    
+    if(not KatakanaUtil.is_repeating_sequence("テストテスト")):
+        raise ValueError("Test failed")
+    
+    if(KatakanaUtil.is_repeating_sequence("テスト")):
+        raise ValueError("Test failed") 
+    
+    if(not KatakanaUtil.is_partially_english("テストtest")):
+        raise ValueError("Test failed")
+    
+    if(KatakanaUtil.is_partially_english("テスト")):
+        raise ValueError("Test failed")
+
 
 if(__name__ == "__main__"):
     main()
