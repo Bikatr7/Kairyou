@@ -15,9 +15,12 @@ def read_file(filename):
 
 def main():
 
-    text_to_preprocess = read_file("tests//testing_preprocessing_text.txt")
+    text = read_file("tests//testing_preprocessing_text.txt")
+    testing_knowledge_base = read_file("tests//testing_knowledge_base.txt")
 
-    Kairyou.preprocess(text_to_preprocess, "tests//testing_replacements.json")
+    names_and_occurrences, indexing_log = Indexer.index(text, testing_knowledge_base, "tests//testing_replacements.json")
+
+    preprocessed_text, preprocessing_log, error_log = Kairyou.preprocess(text, "tests//testing_replacements.json")
 
 
 if(__name__ == "__main__"):
