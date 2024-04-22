@@ -15,6 +15,7 @@ import spacy
 from .util import _validate_replacement_json, _get_elapsed_time
 from .katakana_util import KatakanaUtil
 from .types import NameAndOccurrence
+from .exceptions import InvalidReplacementJsonPath
 
 class Indexer:
 
@@ -49,6 +50,11 @@ class Indexer:
         """
         
         Loads static data into the Indexer class.
+
+        Parameters:
+        text_to_index (str) : The text to index. Can be a path to a text file, or just the text itself.
+        knowledge_base (str) : The knowledge base. Can be a path to a directory containing text files, a path to a text file, or just the text itself.
+        replacement_json (str) : The replacement json. Can be a path to a json, or as the json itself.
 
         """
 
@@ -87,7 +93,7 @@ class Indexer:
                     with open(replacement_json, "r", encoding="utf-8") as file:
                         Indexer._replacement_json = json.load(file)
                 else:
-                    raise ValueError(f"{replacement_json} is not a valid JSON string or file path.")
+                    raise InvalidReplacementJsonPath(replacement_json)
         else:
             Indexer._replacement_json = replacement_json
                         
@@ -321,7 +327,7 @@ class Indexer:
 
         Returns:
         new_names (NameAndOccurrence): A list of names that are not in the knowledge base or replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
-        Indexer.indexing_log (str): Log of the indexing process (names that were flagged as unique 'names' and which occurrence they were flagged at).
+        indexing_log (str): Log of the indexing process (names that were flagged as unique 'names' and which occurrence they were flagged at).
         
         """
 

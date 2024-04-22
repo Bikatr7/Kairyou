@@ -14,7 +14,7 @@ import spacy
 ## custom modules
 from .katakana_util import KatakanaUtil
 from .util import _validate_replacement_json, _get_elapsed_time, Name, ReplacementType, _kudasai_blank_json, _fukuin_blank_json, _kudasai_replacement_rules
-from .exceptions import  InvalidReplacementJsonName, InvalidReplacementJsonPath
+from .exceptions import  InvalidReplacementJsonName, InvalidReplacementJsonPath, InvalidPreprocessingText
 
 # -------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -131,7 +131,7 @@ class Kairyou:
             Kairyou._json_type, Kairyou._replacement_rules = _validate_replacement_json(Kairyou._replacement_json)
 
         else:
-            raise ValueError("The text to be preprocessed cannot be empty.")
+            raise InvalidPreprocessingText("Text to be preprocessed is empty.")
 
         _replaced_names = dict()
 

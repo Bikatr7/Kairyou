@@ -75,3 +75,17 @@ class InvalidReplacementJsonPath(KairyouException):
 
         super().__init__(message)
 
+
+class InvalidPreprocessingText(KairyouException):
+
+    """
+
+    Exception raised when the text to be preprocessed is invalid.
+
+    """
+
+##-------------------start-of-__init__()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    def __init__(self, message:str):
+        
+        super().__init__(message)
