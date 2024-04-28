@@ -15,7 +15,7 @@ dependencies = [
 name = "kairyou"
 version = "v1.6.0"
 authors = [
-  { name="Bikatr7", email="Tetralon07@gmail.com" },
+  { name="Bikatr7", email="Bikatr7@proton.me" },
 ]
 description = "Quickly preprocesses Japanese text using NLP/NER from SpaCy for Japanese translation or other NLP tasks."
 readme = "README.md"

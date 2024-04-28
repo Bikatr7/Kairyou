@@ -181,7 +181,7 @@ For a thorough explanation of the conditions and how they may apply to your use 
 
 **Contact**<a name="contact"></a>
 
-If you have any questions or suggestions, feel free to reach out to me at [Tetralon07@gmail.com](mailto:Tetralon07@gmail.com).
+If you have any questions or suggestions, feel free to reach out to me at [Bikatr7@proton.me](mailto:Bikatr7@proton.me)
 
 Also feel free to check out the [GitHub repository](https://github.com/Bikatr7/Kairyou) for this project.
 
