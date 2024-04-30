@@ -14,7 +14,7 @@ import spacy
 ## custom modules
 from .katakana_util import KatakanaUtil
 from .util import _validate_replacement_json, _get_elapsed_time, Name, ReplacementType, _kudasai_blank_json, _fukuin_blank_json, _kudasai_replacement_rules
-from .exceptions import  InvalidReplacementJsonName, InvalidReplacementJsonPath, InvalidPreprocessingText
+from .exceptions import  InvalidReplacementJsonName, InvalidReplacementJsonPath, InvalidPreprocessingText, SpacyModelNotFound
 
 # -------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -54,7 +54,11 @@ class Kairyou:
     #----------------------------/
 
     ## The spacy NER model used for enhanced replacement checking.
-    _ner = spacy.load("ja_core_news_lg")
+    try:
+        _ner = spacy.load("ja_core_news_lg")
+
+    except Exception:
+        raise SpacyModelNotFound
     
 ##-------------------start-of-_reset_globals()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

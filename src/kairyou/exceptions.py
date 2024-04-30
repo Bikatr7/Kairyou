@@ -10,7 +10,27 @@ class KairyouException(Exception):
     
     Base exception class for Kairyou.
     
+
     """
+
+##-------------------start-of-SpacyModelNotFound---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+class SpacyModelNotFound(KairyouException):
+
+    """
+
+    Exception raised when the spacy model is not found.
+
+    """
+
+##-------------------start-of-__init__()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    def __init__(self):
+                
+        message = f"Spacy model ja_core_news_lg not found. Please download the model using the following command: python -m spacy download ja_core_news_lg\n"
+        
+        super().__init__(message)
 
 ##-------------------start-of-InvalidReplacementJsonName---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
