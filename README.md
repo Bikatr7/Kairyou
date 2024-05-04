@@ -30,8 +30,16 @@ pip install kairyou
 
 You must also install the jp_core_news_lg model from spaCy. This can be done by running the following command:
 
+for windows:
+
 ```bash
 python -m spacy download ja_core_news_lg
+```
+
+for linux:
+
+```bash
+python3 -m spacy download ja_core_news_lg
 ```
 
 Then, you can preprocess Japanese text by importing Kairyou and/or KatakanaUtil/Indexer:
