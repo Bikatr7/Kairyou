@@ -51,6 +51,8 @@ def main():
     
     if(KatakanaUtil.is_partially_english("テスト")):
         raise ValueError("Test failed")
+    
+    print("All tests passed")
 
 
 if(__name__ == "__main__"):

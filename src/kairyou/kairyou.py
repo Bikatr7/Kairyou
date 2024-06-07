@@ -18,7 +18,6 @@ from .exceptions import  InvalidReplacementJsonName, InvalidReplacementJsonPath,
 
 # -------------------start-of-Kairyou---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 class Kairyou:
 
     """
@@ -53,13 +52,8 @@ class Kairyou:
 
     #----------------------------/
 
-    ## The spacy NER model used for enhanced replacement checking.
-    try:
-        _ner = spacy.load("ja_core_news_lg")
+    _ner:spacy.language.Language | None = None
 
-    except Exception:
-        raise SpacyModelNotFound
-    
 ##-------------------start-of-_reset_globals()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -109,6 +103,16 @@ class Kairyou:
         ValueError : If the text to be preprocessed is empty.
 
         """
+
+
+        ## The spacy NER model used for enhanced replacement checking.
+        try:
+
+            if(Kairyou._ner is None):
+                Kairyou._ner = spacy.load("ja_core_news_lg")
+
+        except Exception:
+            raise SpacyModelNotFound
 
         ## If the replacement json is blank, skip the preprocessing.
         if(replacement_json == _kudasai_blank_json or replacement_json == _fukuin_blank_json):
@@ -498,7 +502,7 @@ class Kairyou:
         while (i < len(_jap_lines)):
             if (jap in _jap_lines[i]):
 
-                _sentence = Kairyou._ner(_jap_lines[i])
+                _sentence = Kairyou._ner(_jap_lines[i]) # type:ignore
 
                 for _entity in _sentence.ents:
                     if (_entity.text == jap and _entity.label_ == "PERSON"):
