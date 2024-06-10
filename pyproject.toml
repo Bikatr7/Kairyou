@@ -9,11 +9,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 dependencies = [
-    "spacy>=3.7.0,<3.8.0"
+    "spacy==3.7.5"
 ]
 
 name = "kairyou"
-version = "v1.6.2"
+version = "v1.6.3"
 authors = [
   { name="Bikatr7", email="Bikatr7@proton.me" },
 ]

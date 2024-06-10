@@ -31,7 +31,6 @@ def main():
     length_of_katakana_words = len(KatakanaUtil.katakana_words)
 
     if(not katakana_only or not_katakana_only):
-        print(katakana_only, not_katakana_only)
         raise ValueError("Test failed")
     
     if(length_of_katakana_words < 5000):
