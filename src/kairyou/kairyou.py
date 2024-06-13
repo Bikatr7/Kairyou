@@ -7,6 +7,7 @@ import itertools
 import typing
 import time
 import json
+import regex
 
 ## third-party libraries
 import spacy
@@ -67,6 +68,7 @@ class Kairyou:
 
         """
 
+        Kairyou.text_to_preprocess = ""
         Kairyou.preprocessing_log = ""
         Kairyou.error_log = ""
 
@@ -148,6 +150,8 @@ class Kairyou:
         Kairyou._replace_non_katakana(_replaced_names)
         Kairyou._replace_katakana(_replaced_names)
 
+        Kairyou._perform_missing_honorific_hyphen_correction()
+
         _time_end = time.time()
 
         Kairyou.preprocessing_log += "\nTotal Replacements  : " + \
@@ -156,7 +160,42 @@ class Kairyou:
             _get_elapsed_time(_time_start, _time_end)
 
         return Kairyou.text_to_preprocess, Kairyou.preprocessing_log, Kairyou.error_log
+    
+##-------------------start-of-perform_missing_honorific_hyphen_correction()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    @staticmethod
+    def _perform_missing_honorific_hyphen_correction() -> None:
 
+        """
+
+        Sometimes, if an honorific is present in both the phrase and word lists, the hyphen may be missing. This function corrects that.
+        Typically only occurs with Senpai, Kouhai, and Paisen, and also only in Kudasai type jsons since Fukuin jsons don't have the phrase and word keys
+
+        Parameters:
+        Kairyou.text_to_preprocess (str) : The Kairyou.text_to_preprocess to be corrected.
+
+        Returns:
+        Kairyou.text_to_preprocess (str) : The corrected Kairyou.text_to_preprocess.
+
+        """
+
+        if(Kairyou._json_type != "kudasai"):
+            return 
+
+        honorifics = [honorific for honorific in Kairyou._replacement_json['honorifics'].values()]
+        phrases_and_words = set([word for word in Kairyou._replacement_json['single_words'].values()] + [phrase for phrase in Kairyou._replacement_json['phrases'].values()])
+
+        if(not any(honorific in phrases_and_words for honorific in honorifics)):
+            return 
+
+        honorifics_to_fix = [honorific for honorific in honorifics if honorific in phrases_and_words]
+        english_in_text = [(match.group(), match.start()) for match in regex.finditer(r'\p{Latin}+', Kairyou.text_to_preprocess)]
+
+        for honorific in honorifics_to_fix:
+            for english, start in english_in_text:
+                if(honorific in Kairyou.text_to_preprocess[start:]):
+                    Kairyou.text_to_preprocess = regex.sub(english + honorific, english + "-" + honorific, Kairyou.text_to_preprocess, count=1)
+        
 ##-------------------start-of-_replace_non_katakana()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod

@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 name = "kairyou"
-version = "v1.6.3"
+version = "v1.6.4"
 authors = [
   { name="Bikatr7", email="Bikatr7@proton.me" },
 ]
