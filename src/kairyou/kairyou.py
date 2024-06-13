@@ -172,10 +172,10 @@ class Kairyou:
         Typically only occurs with Senpai, Kouhai, and Paisen, and also only in Kudasai type jsons since Fukuin jsons don't have the phrase and word keys
 
         Parameters:
-        Kairyou.text_to_preprocess (str) : The Kairyou.text_to_preprocess to be corrected.
+        Kairyou.text_to_preprocess (str) : The text
 
         Returns:
-        Kairyou.text_to_preprocess (str) : The corrected Kairyou.text_to_preprocess.
+        Kairyou.text_to_preprocess (str) : The corrected text
 
         """
 
