@@ -125,8 +125,6 @@ _kudasai_replacement_rules = [
 # (title, json_key, is_name, replace_name, honorific_type)
 ('Punctuation', 'kutouten', False, None, None),
 ('Unicode', 'unicode', False, None, None),
-('Phrases', 'phrases', False, None, None),
-('Words', 'single_words', False, None, None),
 ('Enhanced Check Whitelist', 'enhanced_check_whitelist',
     True, ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
 ('Full ReplacementType', 'full_names', True,
@@ -135,6 +133,8 @@ _kudasai_replacement_rules = [
     ReplacementType.ALL_NAMES, ReplacementType.ALL_NAMES),
 ('Name Like', 'name_like', True,
     ReplacementType.ALL_NAMES, ReplacementType.NONE),
+('Phrases', 'phrases', False, None, None),
+('Words', 'single_words', False, None, None),
 ]
 
 _fukuin_replacement_rules = [

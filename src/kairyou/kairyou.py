@@ -150,7 +150,7 @@ class Kairyou:
         Kairyou._replace_non_katakana(_replaced_names)
         Kairyou._replace_katakana(_replaced_names)
 
-        Kairyou._perform_missing_honorific_hyphen_correction()
+        Kairyou._perform_postprocessing()
 
         _time_end = time.time()
 
@@ -161,40 +161,44 @@ class Kairyou:
 
         return Kairyou.text_to_preprocess, Kairyou.preprocessing_log, Kairyou.error_log
     
-##-------------------start-of-perform_missing_honorific_hyphen_correction()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-_perform_postprocessing()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
     @staticmethod
-    def _perform_missing_honorific_hyphen_correction() -> None:
+    def _perform_postprocessing() -> None:
 
         """
 
-        Sometimes, if an honorific is present in both the phrase and word lists, the hyphen may be missing. This function corrects that.
-        Typically only occurs with Senpai, Kouhai, and Paisen, and also only in Kudasai type jsons since Fukuin jsons don't have the phrase and word keys
+        Performs postprocessing on the text after the replacements have been made.
 
-        Parameters:
-        Kairyou.text_to_preprocess (str) : The text
+        """
 
-        Returns:
-        Kairyou.text_to_preprocess (str) : The corrected text
+        Kairyou._perform_missing_space_correction()
+
+##-------------------start-of-_perform_missing_space_correction()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def _perform_missing_space_correction() -> None:
+
+        """
+
+        Sometimes, two individual names maybe be replaced separately, rather than as a single name, leading to a missing space. This function corrects that.
+        Seems to occur rarely, but better to have it than not. Only occurs in Kudasai type jsons.
 
         """
 
         if(Kairyou._json_type != "kudasai"):
             return 
 
-        honorifics = [honorific for honorific in Kairyou._replacement_json['honorifics'].values()]
-        phrases_and_words = set([word for word in Kairyou._replacement_json['single_words'].values()] + [phrase for phrase in Kairyou._replacement_json['phrases'].values()])
-
-        if(not any(honorific in phrases_and_words for honorific in honorifics)):
-            return 
-
-        honorifics_to_fix = [honorific for honorific in honorifics if honorific in phrases_and_words]
         english_in_text = [(match.group(), match.start()) for match in regex.finditer(r'\p{Latin}+', Kairyou.text_to_preprocess)]
+        full_names = [name for name in Kairyou._replacement_json['full_names'].keys()]
 
-        for honorific in honorifics_to_fix:
-            for english, start in english_in_text:
-                if(honorific in Kairyou.text_to_preprocess[start:]):
-                    Kairyou.text_to_preprocess = regex.sub(english + honorific, english + "-" + honorific, Kairyou.text_to_preprocess, count=1)
+        for english, start in english_in_text:
+            for full_name in full_names:
+                first_name, last_name = full_name.split(" ")
+        
+                if(first_name in Kairyou.text_to_preprocess[start:] and last_name in Kairyou.text_to_preprocess[start:]):
+                    Kairyou.text_to_preprocess = Kairyou.text_to_preprocess.replace(first_name + last_name, first_name + " " + last_name)
+                    pass
         
 ##-------------------start-of-_replace_non_katakana()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
