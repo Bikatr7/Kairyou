@@ -15,7 +15,7 @@ import spacy
 from .util import _validate_replacement_json, _get_elapsed_time
 from .katakana_util import KatakanaUtil
 from .types import NameAndOccurrence
-from .exceptions import InvalidReplacementJsonPath
+from .exceptions import InvalidReplacementJsonPath, SpacyModelNotFound
 
 class Indexer:
 
@@ -40,7 +40,7 @@ class Indexer:
     ## dict of entity labels and their occurrences
     _entity_occurrences:dict = {}
 
-    _ner = spacy.load("ja_core_news_lg")
+    _ner:spacy.language.Language | None = None
 
 ##-------------------start-of-load_static_data()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -172,6 +172,7 @@ class Indexer:
         for _entry in Indexer._knowledge_base:
             _entry = _entry.split("\n")
             for _line in _entry:
+                assert Indexer._ner is not None, "Indexer._ner is None. Please ensure that the NER object is loaded before calling this method."
                 _sentence = Indexer._ner(_line)
                 for _entity in _sentence.ents:
 
@@ -187,6 +188,7 @@ class Indexer:
 
         _name_occurrences = {}
         for _entry in Indexer._text_to_index.split("\n"):
+            assert Indexer._ner is not None, "Indexer._ner is None. Please ensure that the NER object is loaded before calling this method."
             _sentence = Indexer._ner(_entry)
             for _entity in _sentence.ents:
 
@@ -310,7 +312,8 @@ class Indexer:
     def index(text_to_index:str, 
               knowledge_base:str, 
               replacement_json:typing.Union[str, dict],
-              blacklist:typing.List[str] = []
+              blacklist:typing.List[str] = [],
+              discard_ner_objects:bool = True
               ) -> typing.Tuple[typing.List[NameAndOccurrence], str]:
 
         """
@@ -324,7 +327,8 @@ class Indexer:
         knowledge_base (str) : The knowledge base. Can be a path to a directory containing text files, a path to a text file, or just the text itself.
         replacement_json (str) : The replacement json. Can be a path to a json, or as the json itself.
         blacklist (list - str) : A list of strings to ignore.
-
+        discard_ner_objects (bool - default: True) : Whether to discard the spacy NER object after processing. This is because having the NER object continuously in memory can be memory intensive.
+        
         Returns:
         new_names (NameAndOccurrence): A list of names that are not in the knowledge base or replacement_json. (NameAndOccurrence is a named tuple with the fields name and occurrence).
         indexing_log (str): Log of the indexing process (names that were flagged as unique 'names' and which occurrence they were flagged at).
@@ -332,6 +336,14 @@ class Indexer:
         """
 
         _time_start = time.time()
+    
+        try:
+
+            if(Indexer._ner is None):
+                Indexer._ner = spacy.load("ja_core_news_lg")
+
+        except Exception:
+            raise SpacyModelNotFound
 
         if(len(blacklist) > 0):
             Indexer._blacklisted_names = blacklist
@@ -356,6 +368,12 @@ class Indexer:
             if(not Indexer._is_name_in_other_sources(_name.name, _all_names)):
                 new_names.append(_name)
                 Indexer.indexing_log += (f"Name: {_name.name} Occurrence: {_name.occurrence} was flagged as a unique 'name'\n")
+
+        if(discard_ner_objects):
+            Indexer._ner = None
+            del Indexer._ner
+            import gc
+            gc.collect()
 
         _time_end = time.time()
 

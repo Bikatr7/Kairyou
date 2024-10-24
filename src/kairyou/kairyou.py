@@ -81,7 +81,7 @@ class Kairyou:
 ##-------------------start-of-preprocess()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def preprocess(text_to_preprocess:str, replacement_json:typing.Union[dict,str], persist:bool = False) -> typing.Tuple[str, str, str]:
+    def preprocess(text_to_preprocess:str, replacement_json:typing.Union[dict,str], persist:bool = False, discard_ner_objects:bool = True) -> typing.Tuple[str, str, str]:
 
         """
 
@@ -95,7 +95,7 @@ class Kairyou:
         text_to_preprocess (str) : The text to be preprocessed.
         replacement_json (dict | str) : The rules for preprocessing. Can be a dictionary or a path to a json file.
         persist (bool | optional | default=False) : If True, the global Kairyou client will not be reset upon starting the function.
-
+        discard_ner_objects (bool | optional | default=True) : Whether to discard the spacy NER object after processing. This is because having the NER object continuously in memory can be memory intensive.
         Returns:
         Kairyou.text_to_preprocess (str) : The preprocessed text.
         Kairyou.preprocessing_log (str) : The log of replacements made.
@@ -151,6 +151,12 @@ class Kairyou:
         Kairyou._replace_katakana(_replaced_names)
 
         Kairyou._perform_postprocessing()
+
+        if(discard_ner_objects):
+            Kairyou._ner = None
+            del Kairyou._ner
+            import gc
+            gc.collect()
 
         _time_end = time.time()
 
