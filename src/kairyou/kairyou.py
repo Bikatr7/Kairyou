@@ -55,6 +55,8 @@ class Kairyou:
 
     _ner:spacy.language.Language | None = None
 
+    _add_closing_period = False
+
 ##-------------------start-of-_reset_globals()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -81,7 +83,7 @@ class Kairyou:
 ##-------------------start-of-preprocess()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def preprocess(text_to_preprocess:str, replacement_json:typing.Union[dict,str], persist:bool = False, discard_ner_objects:bool = True) -> typing.Tuple[str, str, str]:
+    def preprocess(text_to_preprocess:str, replacement_json:typing.Union[dict,str], persist:bool = False, discard_ner_objects:bool = True, add_closing_period:bool = False) -> typing.Tuple[str, str, str]:
 
         """
 
@@ -96,6 +98,7 @@ class Kairyou:
         replacement_json (dict | str) : The rules for preprocessing. Can be a dictionary or a path to a json file.
         persist (bool | optional | default=False) : If True, the global Kairyou client will not be reset upon starting the function.
         discard_ner_objects (bool | optional | default=True) : Whether to discard the spacy NER object after processing. This is because having the NER object continuously in memory can be memory intensive.
+        add_closing_period (bool | optional | default=False) : Whether to add closing periods (。) before 」 where missing.
         Returns:
         Kairyou.text_to_preprocess (str) : The preprocessed text.
         Kairyou.preprocessing_log (str) : The log of replacements made.
@@ -106,6 +109,7 @@ class Kairyou:
 
         """
 
+        Kairyou._add_closing_period = add_closing_period
 
         ## The spacy NER model used for enhanced replacement checking.
         try:
@@ -124,6 +128,9 @@ class Kairyou:
             Kairyou._reset_globals()
 
         if(len(text_to_preprocess) != 0):
+            if(add_closing_period):
+                text_to_preprocess = Kairyou._add_missing_periods(text_to_preprocess)
+            
             Kairyou.text_to_preprocess = text_to_preprocess
 
             if(isinstance(replacement_json, str)):
@@ -565,3 +572,18 @@ class Kairyou:
         Kairyou._total_replacements += _jap_replace_count
 
         return _jap_replace_count
+
+    @staticmethod
+    def _add_missing_periods(text:str) -> str:
+        """
+        Adds closing periods before 」 where no punctuation is present.
+        Must be called before any replacements occur.
+
+        Parameters:
+        text (str): The text to process
+
+        Returns:
+        str: The processed text with periods added where needed
+        """
+        pattern = r'([^。！？\.\!\?])」'
+        return regex.sub(pattern, r'\1。」', text)
