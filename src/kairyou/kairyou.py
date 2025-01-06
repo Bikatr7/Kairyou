@@ -150,14 +150,62 @@ class Kairyou:
         else:
             raise InvalidPreprocessingText("Text to be preprocessed is empty.")
 
-        _replaced_names = dict()
+        _replacement_tracker = {
+            'punctuation': {},  ## For kutouten
+            'names': {
+                'base': {},     ## Name without honorific
+                'honorific': {} ## Name with honorific - flat structure
+            },
+            'words': {},       ## Regular words
+            'phrases': {},     ## Multi-word phrases
+            'debug': []        ## Track all operations in order
+        }
 
+        _replaced_names = dict()
         _time_start = time.time()
 
-        Kairyou._replace_non_katakana(_replaced_names)
-        Kairyou._replace_katakana(_replaced_names)
+        Kairyou._replace_non_katakana(_replaced_names, _replacement_tracker)
+        Kairyou._replace_katakana(_replaced_names, _replacement_tracker)
 
         Kairyou._perform_postprocessing()
+
+        print("\nDetailed Tracking Analysis:")
+        print("--------------------------")
+        
+        total = 0
+        for category in ['punctuation', 'words', 'phrases']:
+            if(_replacement_tracker[category]):
+                print(f"\n{category.title()}:")
+                cat_total = sum(_replacement_tracker[category].values())
+                total += cat_total
+                print(f"Total: {cat_total}")
+                for item, count in _replacement_tracker[category].items():
+                    print(f"  {item}: {count}")
+
+        print("\nNames:")
+        name_total = sum(_replacement_tracker['names']['base'].values())
+        honorific_total = sum(_replacement_tracker['names']['honorific'].values())
+        total += name_total + honorific_total
+        print(f"Base names total: {name_total}")
+        print(f"Honorific names total: {honorific_total}")
+        
+        print("\nDetailed name replacements:")
+        for name, count in _replacement_tracker['names']['base'].items():
+            print(f"  {name}: {count}")
+            honorifics = {k.replace(name, ''): v 
+                         for k, v in _replacement_tracker['names']['honorific'].items() 
+                         if(k.startswith(name))}
+            if(honorifics):
+                for honorific, hon_count in honorifics.items():
+                    print(f"    with {honorific}: {hon_count}")
+
+        print("\nDebug log:")
+        for entry in _replacement_tracker['debug']:
+            print(f"  {entry}")
+
+        print("\nTotals:")
+        print(f"Sum of all tracked replacements: {total}")
+        print(f"Running counter total: {Kairyou._total_replacements}")
 
         if(discard_ner_objects):
             Kairyou._ner = None
@@ -216,7 +264,7 @@ class Kairyou:
 ##-------------------start-of-_replace_non_katakana()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def _replace_non_katakana(replaced_names:dict) -> None:
+    def _replace_non_katakana(replaced_names:dict, replacement_tracker:dict) -> None:
 
         """
 
@@ -224,7 +272,7 @@ class Kairyou:
 
         Parameters:
         replaced_names (dict - str) : Names that have been replaced.
-
+        replacement_tracker (dict) : A dictionary to track the replacements.
         """
 
         ## for non-katakana replacements
@@ -249,7 +297,8 @@ class Kairyou:
                             continue
 
                         Kairyou._replace_name(_current_name, _replace_name_param, _honorific_type,
-                                             replaced_names, _json_key, is_potential_name=True, is_katakana=False)
+                                             replaced_names, _json_key, is_potential_name=True, 
+                                             is_katakana=False, tracker=replacement_tracker)
 
                 except Exception as _e:
                     Kairyou.error_log += "Issue with the following key : " + _json_key + "\n"
@@ -261,7 +310,7 @@ class Kairyou:
                     for _jap, _eng in Kairyou._replacement_json[_json_key].items():
 
                         _num_replacements = Kairyou._replace_single_word(
-                            _jap, _eng, is_potential_name=False)
+                            _jap, _eng, is_potential_name=False, tracker=replacement_tracker)
 
                         if(_num_replacements > 0):
                             Kairyou.preprocessing_log += str(_jap) + " → " + str(
@@ -275,7 +324,7 @@ class Kairyou:
 ##-------------------start-of-_replace_katakana()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def _replace_katakana(replaced_names:dict) -> None:
+    def _replace_katakana(replaced_names:dict, replacement_tracker:dict) -> None:
 
         """
 
@@ -283,6 +332,7 @@ class Kairyou:
 
         Parameters:
         replaced_names (dict - str) : Names we have replaced.
+        replacement_tracker (dict) : A dictionary to track the replacements.
 
         """
 
@@ -327,7 +377,7 @@ class Kairyou:
 
                 try:
                     Kairyou._replace_name(_current_name, _replace_name_param, _honorific_type,
-                                         replaced_names, _json_key, is_potential_name=True, is_katakana=True)
+                                         replaced_names, _json_key, is_potential_name=True, is_katakana=True, tracker=replacement_tracker)
 
                 except Exception as _e:
                     Kairyou.error_log += "Issue with the following key : " + _json_key + "\n"
@@ -340,7 +390,7 @@ class Kairyou:
 
                 try:
                     _num_replacements = Kairyou._replace_single_word(
-                        _jap, _eng, is_potential_name=False, is_katakana=True)
+                        _jap, _eng, is_potential_name=False, is_katakana=True, tracker=replacement_tracker)
 
                     if(_num_replacements > 0):
                         Kairyou.preprocessing_log += str(_jap) + " → " + str(
@@ -409,8 +459,7 @@ class Kairyou:
 # -------------------start-of-_replace_single_word()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def _replace_single_word(word:str, replacement:str, is_potential_name:bool, is_katakana:bool = False) -> int:
-
+    def _replace_single_word(word:str, replacement:str, is_potential_name:bool, is_katakana:bool = False, tracker=None, skip_honorific_tracking:bool = False) -> int:
         """
 
         Replaces a single word in the Japanese text, with an additional check for Katakana words.
@@ -422,47 +471,55 @@ class Kairyou:
         replacement (string) : The replacement for the word.
         is_potential_name (bool) : Indicates if the word is a potential name.
         is_katakana (bool | optional | default=false) : Indicates if the word is in Katakana.
+        tracker (dict | optional | default=None) : A dictionary to track the replacements.
+        skip_honorific_tracking (bool | optional | default=False) : Indicates if honorific tracking should be skipped.
 
         Returns:
         _num_occurrences (int) : The number of occurrences of the word replaced.
 
         """
-
         _num_occurrences = 0
 
         if(is_katakana):
 
-            ## Skip replacement if it's an actual word.
+            ## Skip replacement if the word is actually a known katakana word, translation will get it just fine without this.
             if(KatakanaUtil.is_actual_word(word)):
                 return 0
-
             else:
 
                 ## Use NER to ensure we're not replacing a proper name that's not in our list of Katakana words.
                 if(is_potential_name):
-                    Kairyou._perform_enhanced_replace(word, replacement)
-
+                    _num_occurrences = Kairyou._perform_enhanced_replace(word, replacement, tracker)
                 else:
                     _num_occurrences = Kairyou.text_to_preprocess.count(word)
                     if(_num_occurrences > 0):
                         Kairyou.text_to_preprocess = Kairyou.text_to_preprocess.replace(
                             word, replacement)
-
+                        Kairyou._total_replacements += _num_occurrences
         else:
             _num_occurrences = Kairyou.text_to_preprocess.count(word)
             if(_num_occurrences > 0):
                 Kairyou.text_to_preprocess = Kairyou.text_to_preprocess.replace(
                     word, replacement)
+                Kairyou._total_replacements += _num_occurrences
 
-        Kairyou._total_replacements += _num_occurrences
+        if(_num_occurrences > 0):
+            if(tracker is not None and not skip_honorific_tracking):
+                if(word in Kairyou._replacement_json.get('kutouten', {})):
+                    tracker['punctuation'][word] = tracker['punctuation'].get(word, 0) + _num_occurrences
+                elif(' ' in word):  ## Multi-word phrase
+                    tracker['phrases'][word] = tracker['phrases'].get(word, 0) + _num_occurrences
+                elif(is_potential_name):
+                    tracker['names']['base'][word] = tracker['names']['base'].get(word, 0) + _num_occurrences
+                else:
+                    tracker['words'][word] = tracker['words'].get(word, 0) + _num_occurrences
 
         return _num_occurrences
 
 # -------------------start-of-_replace_name()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def _replace_name(name:Name, replace_type:ReplacementType, honorific_type:ReplacementType, replaced_names:dict, json_key:str, is_potential_name:bool, is_katakana:bool) -> None:
-
+    def _replace_name(name:Name, replace_type:ReplacementType, honorific_type:ReplacementType, replaced_names:dict, json_key:str, is_potential_name:bool, is_katakana:bool, tracker=None) -> None:
         """
 
         Replaces names in the japanese text based off of tuples returned by _yield_name_replacements.
@@ -476,65 +533,65 @@ class Kairyou:
 
         """
 
+        ## First, check if any part of this name appears in whitelist entries
+        _is_whitelisted = any(part in entry 
+                             for entry in Kairyou._replacement_json.get('enhanced_check_whitelist', {}).values()
+                             for part in name.jap.split())
+
         for _eng, _jap, _no_honor in Kairyou._yield_name_replacements(name, replace_type, honorific_type):
 
-            ## Skip the replacement if this name has already been processed.
+            ## Skip the replacement if the name has already been processed
             if(_jap in replaced_names):
                 continue
 
             _replacement_data = dict()
 
-            ## Process honorifics if necessary
+            ## Process honorifics first
             ## Both fukuin and kudasai jsons have the honorifics key
             for _honor, _honorific_english in Kairyou._replacement_json['honorifics'].items():
-                _replacement_data[_honorific_english] = Kairyou._replace_single_word(
+                _count = Kairyou._replace_single_word(
                     f'{_jap}{_honor}',
                     f'{_eng}-{_honorific_english}',
 
-                    # if honorifics, don't worry about additonal checking
-                    is_potential_name=False,
+                    ## If honorifics, don't worry about additional checking
+                    is_potential_name=is_potential_name,
                     is_katakana=False,
+                    tracker=None
                 )
+                if(_count > 0):
+                    if(tracker is not None):
+                        full_name = f'{_jap}{_honor}'
+                        tracker['names']['honorific'][full_name] = _count
+                        tracker['debug'].append(f"Name with honorific: {full_name} → {_eng}-{_honorific_english} ({_count})")
+                    _replacement_data[_honorific_english] = _count
 
-            if(is_katakana):
-                ## Skip replacement if it's an actual Katakana word.
-                if(KatakanaUtil.is_actual_word(_jap)):
-                    continue
-                else:
-                    ## Perform enhanced replacement check with NER
-                    _replacement_data['NA'] = Kairyou._perform_enhanced_replace(
-                        _jap, _eng)
-
-            ## If the name does not have honorific and isn't a known Katakana word, or we aren't checking for Katakana
+            ## Then handle base name
             if(_no_honor):
-                ## needs to be kudasai json type to have that key, so this'll short-circuit that check, can also just be a single kanji
-                if(Kairyou._json_type == "kudasai" and json_key == "enhanced_check_whitelist" or len(_jap) == 1):
-                    _replacement_data['NA'] = Kairyou._perform_enhanced_replace(
-                        _jap, _eng)
-
+                ## Always use enhanced replace for whitelisted names
+                if(_is_whitelisted or Kairyou._json_type == "kudasai" and json_key == "enhanced_check_whitelist" or len(_jap) == 1):
+                    _count = Kairyou._perform_enhanced_replace(_jap, _eng, tracker)
+                elif(is_katakana):
+                    if(KatakanaUtil.is_actual_word(_jap)):
+                        continue
+                    _count = Kairyou._perform_enhanced_replace(_jap, _eng, tracker)
                 else:
-                    _replacement_data['NA'] = Kairyou._replace_single_word(
-                        _jap, _eng, is_potential_name, is_katakana)
+                    _count = Kairyou._replace_single_word(_jap, _eng, is_potential_name=is_potential_name, is_katakana=is_katakana, tracker=tracker)
 
-            ## Sum the total replacements for this name
+                if(_count > 0):
+                    _replacement_data['NA'] = _count
+
+            ## Sum and log
             _total = sum(_replacement_data.values())
-
-            replaced_names[_jap] = _total
-
-            ## If no replacements occurred, skip the logging
-            if(_total == 0):
-                continue
-
-            ## Log the replacements
-            Kairyou.preprocessing_log += f'{_eng} : {_total} ('
-            Kairyou.preprocessing_log += ', '.join(
-                [f'{_key}-{_value}' for _key, _value in _replacement_data.items() if _value > 0]) + ')\n'
+            if(_total > 0):
+                replaced_names[_jap] = _total
+                Kairyou.preprocessing_log += f'{_eng} : {_total} ('
+                Kairyou.preprocessing_log += ', '.join(
+                    [f'{_key}-{_value}' for _key, _value in _replacement_data.items()]) + ')\n'
 
 ##-------------------start-of-_perform_enhanced_replace()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def _perform_enhanced_replace(jap:str, replacement:str) -> int:
-        
+    def _perform_enhanced_replace(jap:str, replacement:str, tracker=None) -> int:
         """
 
         Uses NER (Named Entity Recognition) from the spacy module to replace names that need to be more carefully replaced, such as single kanji, katakana names, or those placed in the user whitelist.
@@ -544,6 +601,7 @@ class Kairyou:
         Parameters:
         jap (str) : Japanese to be replaced.
         replacement (str) : The replacement for the Japanese
+        tracker (dict) : A dictionary to track the replacements.
 
         Returns:
         jap_replace_count (int) : How many japanese replacements that were made.
@@ -570,6 +628,9 @@ class Kairyou:
 
         Kairyou.text_to_preprocess = '\n'.join(_jap_lines)
         Kairyou._total_replacements += _jap_replace_count
+
+        if(_jap_replace_count > 0 and tracker is not None):
+            tracker['names']['base'][jap] = tracker['names']['base'].get(jap, 0) + _jap_replace_count
 
         return _jap_replace_count
 
