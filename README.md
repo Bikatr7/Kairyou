@@ -101,7 +101,23 @@ print(preprocessed_text)
 
 Currently, Kairyou supports two json types, "Kudasai" and "Fukuin". "Kudasai" is the native type and originated from that program, Fukuin is what the original onegai program used, as well as what the kroatoan's Fukuin program uses. No major differences in replacement are present between the two.
 
-Kairyou performs some post-processing on the text to correct any issues that may have arisen during the preprocessing.
+Kairyou performs some post-processing on the text to correct any issues that may have arisen during the preprocessing. Additionally, both JSON formats now support an optional `postprocess` field that allows for English-to-English replacements after all Japanese-to-English replacements have been completed. This is useful for:
+
+- Correcting translation inconsistencies
+- Standardizing terminology 
+- Converting honorifics to more familiar terms
+- Replacing long phrases with abbreviations
+
+Example postprocess usage:
+```json
+{
+  "postprocess": {
+    "Advanced Nurturing High School": "ANHS",
+    "senpai": "senior", 
+    "kōhai": "junior"
+  }
+}
+```
 
 [Blank Kudasai Json](examples/blank_kudasai.json)
 

@@ -174,5 +174,11 @@
   "先生": "sensei",
   "氏": "shi",
   "上": "ue"
+  },
+  
+  "postprocess": {
+    "Advanced Nurturing High School": "ANHS", 
+    "senpai": "senior",
+    "kōhai": "junior"
   }
 }

@@ -29,6 +29,7 @@ jobs:
       - name: Set Environment Variables and Run Tests
         run: |
           python tests/passing.py
+          python tests/test_postprocess.py
 
       - name: Build the package
         run: |
@@ -59,7 +60,7 @@ jobs:
       - name: Set Environment Variables and Run Tests
         run: |
           python tests/passing.py
-
+          python tests/test_postprocess.py
       - name: Build the package
         run: |
           python -m build
@@ -89,6 +90,7 @@ jobs:
       - name: Set Environment Variables and Run Tests
         run: |
           python tests/passing.py
+          python tests/test_postprocess.py
 
       - name: Install twine
         run: |

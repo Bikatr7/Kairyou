@@ -183,6 +183,10 @@ _kudasai_blank_json={
 
     "enhanced_check_whitelist": {
 
+    },
+    
+    "postprocess": {
+
     }
     
   }
@@ -213,6 +217,10 @@ _fukuin_blank_json={
   },
 
   "honorifics": {
+
+  },
+  
+  "postprocess": {
 
   }
 }

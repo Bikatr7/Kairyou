@@ -1,4 +1,3 @@
-
 {
   "honorifics": {
     "ちゃん": "chan",
@@ -194,6 +193,11 @@
 
   "enhanced_check_whitelist": {
     "Hoshinomiya Chie": ["星之宮","知恵"]
-  }
+  },
   
+  "postprocess": {
+    "Advanced Nurturing High School": "ANHS",
+    "senpai": "senior",
+    "kōhai": "junior"
+  }
 }

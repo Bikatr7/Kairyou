@@ -234,6 +234,40 @@ class Kairyou:
         """
 
         Kairyou._perform_missing_space_correction()
+        Kairyou._perform_english_postprocessing()
+
+##-------------------start-of-_perform_english_postprocessing()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def _perform_english_postprocessing() -> None:
+
+        """
+
+        Performs English-to-English postprocessing replacements using the postprocess field from the JSON.
+        This allows for correcting or replacing English text that was previously translated from Japanese.
+
+        """
+
+        if('postprocess' not in Kairyou._replacement_json):
+            return
+
+        _postprocess_dict = Kairyou._replacement_json['postprocess']
+        
+        if(not _postprocess_dict):
+            return
+
+        try:
+            for _english_from, _english_to in _postprocess_dict.items():
+                _num_replacements = Kairyou.text_to_preprocess.count(_english_from)
+                
+                if(_num_replacements > 0):
+                    Kairyou.text_to_preprocess = Kairyou.text_to_preprocess.replace(_english_from, _english_to)
+                    Kairyou._total_replacements += _num_replacements
+                    Kairyou.preprocessing_log += f"[POSTPROCESS] {_english_from} → {_english_to} : {_num_replacements}\n"
+                    
+        except Exception as _e:
+            Kairyou.error_log += "Issue with postprocessing replacements\n"
+            Kairyou.error_log += "Error is as follows : " + str(_e) + "\n"
 
 ##-------------------start-of-_perform_missing_space_correction()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
